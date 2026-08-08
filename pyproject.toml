@@ -1,0 +1,109 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cvflow"
+version = "0.1.0"
+description = "ESLint / DevTools for computer-vision datasets — inspect datasets for broken, duplicated, inconsistent, or suspicious data."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Muhammad Rizwan Munawar" }]
+keywords = [
+    "computer-vision",
+    "dataset",
+    "data-quality",
+    "yolo",
+    "coco",
+    "annotations",
+    "linter",
+    "cli",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+    "Topic :: Software Development :: Quality Assurance",
+    "Typing :: Typed",
+]
+# The MVP foundation is intentionally dependency-free at runtime. Heavier
+# dependencies (image I/O, perceptual hashing, rich reporting) are introduced
+# in the PRs that need them so the install stays lean.
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff>=0.6.0",
+    "mypy>=1.8",
+]
+
+[project.urls]
+Homepage = "https://github.com/RizwanMunawar/cvflow"
+Repository = "https://github.com/RizwanMunawar/cvflow"
+Issues = "https://github.com/RizwanMunawar/cvflow/issues"
+Changelog = "https://github.com/RizwanMunawar/cvflow/blob/main/CHANGELOG.md"
+
+[project.scripts]
+cvflow = "cvflow.cli.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cvflow"]
+
+# ---------------------------------------------------------------------------
+# Tooling
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "SIM", # flake8-simplify
+    "TID", # flake8-tidy-imports
+    "RUF", # ruff-specific rules
+]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011"]
+
+[tool.mypy]
+# Type-checking target. Runtime support for 3.9 is verified by the pytest
+# matrix; recent mypy releases require this be 3.10+.
+python_version = "3.10"
+strict = true
+files = ["src", "tests"]
+warn_unused_configs = true
+show_error_codes = true
+pretty = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["cvflow"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true

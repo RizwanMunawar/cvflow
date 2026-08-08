@@ -1,0 +1,14 @@
+"""Normalized domain model shared across CVFlow.
+
+These types are format-agnostic. Dataset loaders (YOLO, COCO, …) translate
+their source formats into this model, and the analysis engine produces
+:class:`Issue` values against it. Keeping the model here decouples *what* a
+dataset is from *how* it was stored on disk.
+"""
+
+from __future__ import annotations
+
+from cvflow.model.issue import Issue, Location
+from cvflow.model.severity import Severity
+
+__all__ = ["Issue", "Location", "Severity"]
