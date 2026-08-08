@@ -10,6 +10,7 @@ import pytest
 
 from cvflow import __version__
 from cvflow.cli.main import (
+    EXIT_LOAD_ERROR,
     EXIT_OK,
     EXIT_TARGET_NOT_FOUND,
     EXIT_USAGE,
@@ -33,12 +34,33 @@ def test_no_command_prints_help_and_usage_exit(capsys: pytest.CaptureFixture[str
     assert "inspect" in out
 
 
-def test_inspect_existing_path(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    code = main(["inspect", str(tmp_path)])
+def test_inspect_loads_and_summarizes(
+    yolo_yaml_dataset: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    code = main(["inspect", str(yolo_yaml_dataset)])
     assert code == EXIT_OK
     out = capsys.readouterr().out
-    assert str(tmp_path.resolve()) in out
-    assert "not implemented yet" in out.lower()
+    assert "YOLO dataset" in out
+    assert "Images" in out
+    assert "Annotations" in out
+    assert "train" in out
+
+
+def test_inspect_explicit_format(
+    coco_dir_dataset: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    code = main(["inspect", str(coco_dir_dataset), "--format", "coco"])
+    assert code == EXIT_OK
+    out = capsys.readouterr().out
+    assert "COCO dataset" in out
+
+
+def test_inspect_undetectable_dataset(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    (tmp_path / "readme.txt").write_text("not a dataset")
+    code = main(["inspect", str(tmp_path)])
+    assert code == EXIT_LOAD_ERROR
+    err = capsys.readouterr().err
+    assert "error" in err.lower()
 
 
 def test_inspect_missing_path(capsys: pytest.CaptureFixture[str]) -> None:
@@ -55,10 +77,10 @@ def test_parser_builds() -> None:
     assert str(args.path) == "."
 
 
-def test_module_entry_point(tmp_path: Path) -> None:
+def test_module_entry_point(yolo_yaml_dataset: Path) -> None:
     # `python -m cvflow inspect <path>` should behave like the console script.
     result = subprocess.run(
-        [sys.executable, "-m", "cvflow", "inspect", str(tmp_path)],
+        [sys.executable, "-m", "cvflow", "inspect", str(yolo_yaml_dataset)],
         capture_output=True,
         text=True,
         check=False,

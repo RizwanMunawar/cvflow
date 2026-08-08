@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Dataset loaders (M2):
+  - Normalized, format-agnostic dataset model (`BoundingBox`, `ImageItem`,
+    `Dataset`) using canonical normalized `xyxy` box coordinates.
+  - Pluggable loader abstraction (`DatasetLoader`) with a registry,
+    auto-detection (`detect_format`), and a `load_dataset(path, fmt=None)`
+    entry point.
+  - **YOLO loader** — Ultralytics `data.yaml` plus the `images/`+`labels/`
+    convention; class names from yaml / `classes.txt` / inferred.
+  - **COCO loader** — single instances JSON or an `annotations/` directory of
+    splits; absolute bboxes normalized via image dimensions.
+  - `cvflow inspect <path>` now loads a dataset and prints a load summary
+    (format, images, annotations, classes, splits), with an optional
+    `--format` flag.
+  - `pyyaml` added as the first runtime dependency (YOLO `data.yaml`).
+
 ## [0.1.0] — 2026-08-08
 
 ### Added

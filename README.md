@@ -65,10 +65,23 @@ commands:
   inspect   Analyze a dataset and report integrity, annotation, and quality issues.
 ```
 
-> **Status: early foundation (v0.1.0).** The CLI, packaging, domain model, and
-> CI are in place. The dataset loaders (YOLO, COCO) and the analysis engine land
-> in the next batches — see the [roadmap](#roadmap). Running `cvflow inspect`
-> today validates your path and prints a placeholder.
+> **Status: early development (v0.1.0).** The CLI, packaging, domain model, CI,
+> and **dataset loaders (YOLO + COCO)** are in place. Running `cvflow inspect`
+> today loads your dataset and prints a summary; the analysis engine (integrity,
+> annotations, statistics, duplicates, leakage) lands in the next batches — see
+> the [roadmap](#roadmap).
+>
+> ```console
+> $ cvflow inspect ./dataset
+> CVFlow 0.1.0
+> Loaded YOLO dataset: dataset
+> Root: /path/to/dataset
+> ────────────────────────────────────────
+> Images                 3
+> Annotations            4
+> Classes                2
+> Splits        train, val
+> ```
 
 ## Product philosophy
 
@@ -88,7 +101,7 @@ CVFlow is built in small, reviewable batches:
 | Batch | Focus |
 | ----- | ----- |
 | **M1** | Project foundation — CLI, packaging, model, tests, CI ✅ |
-| **M2** | Dataset loaders — YOLO & COCO → normalized model |
+| **M2** | Dataset loaders — YOLO & COCO → normalized model ✅ |
 | **M3** | Integrity analysis — corrupt images, missing/invalid annotations |
 | **M4** | Annotation analysis — bounding-box validation & anomalies |
 | **M5** | Dataset statistics — distributions & outlier detection |
