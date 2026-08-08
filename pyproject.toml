@@ -34,10 +34,12 @@ classifiers = [
     "Topic :: Software Development :: Quality Assurance",
     "Typing :: Typed",
 ]
-# The MVP foundation is intentionally dependency-free at runtime. Heavier
-# dependencies (image I/O, perceptual hashing, rich reporting) are introduced
-# in the PRs that need them so the install stays lean.
-dependencies = []
+# Runtime dependencies are kept minimal and added only when a batch needs them.
+# Heavier dependencies (image I/O, perceptual hashing, rich reporting) are
+# introduced in the PRs that need them so the install stays lean.
+dependencies = [
+    "pyyaml>=6.0",  # parse YOLO data.yaml
+]
 
 [project.optional-dependencies]
 dev = [
@@ -45,6 +47,7 @@ dev = [
     "pytest-cov>=4.1",
     "ruff>=0.6.0",
     "mypy>=1.8",
+    "types-PyYAML>=6.0",
 ]
 
 [project.urls]

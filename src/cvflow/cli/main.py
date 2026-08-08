@@ -18,6 +18,9 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from cvflow import __version__
+from cvflow.exceptions import DatasetError
+from cvflow.loaders import available_formats, load_dataset
+from cvflow.model import Dataset
 
 _PROG = "cvflow"
 
@@ -26,6 +29,7 @@ _PROG = "cvflow"
 EXIT_OK = 0
 EXIT_USAGE = 2
 EXIT_TARGET_NOT_FOUND = 3
+EXIT_LOAD_ERROR = 4
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -60,6 +64,14 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         help="Path to the dataset root directory.",
     )
+    inspect.add_argument(
+        "-f",
+        "--format",
+        dest="format",
+        choices=available_formats(),
+        default=None,
+        help="Dataset format. Auto-detected when omitted.",
+    )
     inspect.set_defaults(func=_cmd_inspect)
 
     return parser
@@ -68,21 +80,42 @@ def build_parser() -> argparse.ArgumentParser:
 def _cmd_inspect(args: argparse.Namespace) -> int:
     """Handle ``cvflow inspect <path>``.
 
-    In the foundation this validates the target path and prints a placeholder.
-    The analysis engine is connected in later batches (M2+).
+    Loads the dataset and prints a concise load summary. Full statistics,
+    integrity checks, and quality analysis are wired in by later batches
+    (M3+); for now this proves the loaders work end to end.
     """
     target: Path = args.path
     if not target.exists():
         print(f"{_PROG}: error: path does not exist: {target}", file=sys.stderr)
         return EXIT_TARGET_NOT_FOUND
 
-    print(f"CVFlow {__version__}")
-    print(f"Target: {target.resolve()}")
-    print()
-    print("Dataset analysis is not implemented yet in this build.")
-    print("Coming next: dataset loaders (YOLO, COCO) and the analysis engine.")
-    print("Track progress: https://github.com/RizwanMunawar/cvflow")
+    try:
+        dataset = load_dataset(target, fmt=args.format)
+    except DatasetError as exc:
+        print(f"{_PROG}: error: {exc}", file=sys.stderr)
+        return EXIT_LOAD_ERROR
+
+    _print_load_summary(dataset)
     return EXIT_OK
+
+
+def _print_load_summary(dataset: Dataset) -> None:
+    """Print a short, human-friendly summary of a freshly loaded dataset."""
+    splits = dataset.splits
+    splits_text = ", ".join(splits) if splits else "—"
+
+    print(f"CVFlow {__version__}")
+    print(f"Loaded {dataset.format.upper()} dataset: {dataset.name}")
+    print(f"Root: {dataset.root}")
+    print("─" * 40)
+    print(f"{'Images':<14}{dataset.num_images:>10,}")
+    print(f"{'Annotations':<14}{dataset.num_annotations:>10,}")
+    print(f"{'Classes':<14}{dataset.num_classes:>10,}")
+    print(f"{'Splits':<14}{splits_text:>10}")
+    print()
+    print("Analysis (integrity, annotations, statistics, duplicates, leakage)")
+    print("is coming in the next batches. Track progress:")
+    print("https://github.com/RizwanMunawar/cvflow")
 
 
 def main(argv: Sequence[str] | None = None) -> int:

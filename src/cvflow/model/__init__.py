@@ -8,7 +8,15 @@ dataset is from *how* it was stored on disk.
 
 from __future__ import annotations
 
+from cvflow.model.dataset import BoundingBox, Dataset, ImageItem
 from cvflow.model.issue import Issue, Location
 from cvflow.model.severity import Severity
 
-__all__ = ["Issue", "Location", "Severity"]
+__all__ = [
+    "BoundingBox",
+    "Dataset",
+    "ImageItem",
+    "Issue",
+    "Location",
+    "Severity",
+]
