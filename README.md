@@ -66,21 +66,32 @@ commands:
 ```
 
 > **Status: early development (v0.1.0).** The CLI, packaging, domain model, CI,
-> and **dataset loaders (YOLO + COCO)** are in place. Running `cvflow inspect`
-> today loads your dataset and prints a summary; the analysis engine (integrity,
-> annotations, statistics, duplicates, leakage) lands in the next batches — see
+> **dataset loaders (YOLO + COCO)**, and the **analysis engine with integrity
+> checks** are in place. Running `cvflow inspect` today loads your dataset, runs
+> integrity checks, and prints a prioritized health report. Annotation geometry,
+> statistics, duplicates, and leakage detection land in the next batches — see
 > the [roadmap](#roadmap).
 >
 > ```console
 > $ cvflow inspect ./dataset
-> CVFlow 0.1.0
-> Loaded YOLO dataset: dataset
-> Root: /path/to/dataset
-> ────────────────────────────────────────
-> Images                 3
-> Annotations            4
-> Classes                2
-> Splits        train, val
+> CVFlow Dataset Health
+> ────────────────────────────────────────────────────
+> Format          YOLO
+> Images          2
+> Annotations     2
+> Classes         2
+> Splits          train
+>
+> Health Summary
+> ────────────────────────────────────────────────────
+> ERROR        1
+> WARNING      1
+> INFO         0
+>
+> Most Important Problems
+> ────────────────────────────────────────────────────
+> 1. [ERROR] Image file is unreadable or corrupt.
+> 2. [WARNING] Annotation uses class id 9, which is not defined.
 > ```
 
 ## Product philosophy
@@ -102,7 +113,7 @@ CVFlow is built in small, reviewable batches:
 | ----- | ----- |
 | **M1** | Project foundation — CLI, packaging, model, tests, CI ✅ |
 | **M2** | Dataset loaders — YOLO & COCO → normalized model ✅ |
-| **M3** | Integrity analysis — corrupt images, missing/invalid annotations |
+| **M3** | Integrity analysis — corrupt images, missing/invalid annotations ✅ |
 | **M4** | Annotation analysis — bounding-box validation & anomalies |
 | **M5** | Dataset statistics — distributions & outlier detection |
 | **M6** | Duplicate detection — exact + perceptual hashing |

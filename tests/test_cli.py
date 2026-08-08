@@ -10,6 +10,7 @@ import pytest
 
 from cvflow import __version__
 from cvflow.cli.main import (
+    EXIT_ISSUES_FOUND,
     EXIT_LOAD_ERROR,
     EXIT_OK,
     EXIT_TARGET_NOT_FOUND,
@@ -34,15 +35,13 @@ def test_no_command_prints_help_and_usage_exit(capsys: pytest.CaptureFixture[str
     assert "inspect" in out
 
 
-def test_inspect_loads_and_summarizes(
-    yolo_yaml_dataset: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    code = main(["inspect", str(yolo_yaml_dataset)])
+def test_inspect_reports_health(clean_dataset: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    # clean_dataset has valid images and only a WARNING -> exit OK, report shown.
+    code = main(["inspect", str(clean_dataset)])
     assert code == EXIT_OK
     out = capsys.readouterr().out
-    assert "YOLO dataset" in out
-    assert "Images" in out
-    assert "Annotations" in out
+    assert "CVFlow Dataset Health" in out
+    assert "Health Summary" in out
     assert "train" in out
 
 
@@ -52,7 +51,42 @@ def test_inspect_explicit_format(
     code = main(["inspect", str(coco_dir_dataset), "--format", "coco"])
     assert code == EXIT_OK
     out = capsys.readouterr().out
-    assert "COCO dataset" in out
+    assert "COCO" in out
+
+
+def test_inspect_returns_nonzero_on_errors(
+    integrity_dataset: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    code = main(["inspect", str(integrity_dataset)])
+    assert code == EXIT_ISSUES_FOUND
+    out = capsys.readouterr().out
+    assert "ERROR" in out
+
+
+def test_inspect_no_images_flag_skips_corrupt(
+    corrupt_only_dataset: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # With images checked, the corrupt image is an ERROR -> non-zero exit.
+    code = main(["inspect", str(corrupt_only_dataset)])
+    out = capsys.readouterr().out
+    assert code == EXIT_ISSUES_FOUND
+    assert "corrupt" in out.lower()
+
+    # With --no-images, the corrupt check is skipped and nothing else is wrong.
+    code = main(["inspect", str(corrupt_only_dataset), "--no-images"])
+    out = capsys.readouterr().out
+    assert code == EXIT_OK
+    assert "corrupt" not in out.lower()
+
+
+def test_inspect_strict_flag_fails_on_warnings(
+    clean_dataset: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # clean_dataset has a background image -> empty-image WARNING, no ERRORs.
+    assert main(["inspect", str(clean_dataset)]) == EXIT_OK
+    capsys.readouterr()
+    assert main(["inspect", str(clean_dataset), "--strict"]) == EXIT_ISSUES_FOUND
+    capsys.readouterr()
 
 
 def test_inspect_undetectable_dataset(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
@@ -77,13 +111,13 @@ def test_parser_builds() -> None:
     assert str(args.path) == "."
 
 
-def test_module_entry_point(yolo_yaml_dataset: Path) -> None:
+def test_module_entry_point(clean_dataset: Path) -> None:
     # `python -m cvflow inspect <path>` should behave like the console script.
     result = subprocess.run(
-        [sys.executable, "-m", "cvflow", "inspect", str(yolo_yaml_dataset)],
+        [sys.executable, "-m", "cvflow", "inspect", str(clean_dataset)],
         capture_output=True,
         text=True,
         check=False,
     )
     assert result.returncode == EXIT_OK
-    assert __version__ in result.stdout
+    assert "CVFlow Dataset Health" in result.stdout

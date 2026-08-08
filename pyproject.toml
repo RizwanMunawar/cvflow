@@ -39,6 +39,7 @@ classifiers = [
 # introduced in the PRs that need them so the install stays lean.
 dependencies = [
     "pyyaml>=6.0",  # parse YOLO data.yaml
+    "pillow>=10.0",  # decode images for corrupt-image detection
 ]
 
 [project.optional-dependencies]
