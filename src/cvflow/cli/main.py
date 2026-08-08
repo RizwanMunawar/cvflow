@@ -1,13 +1,9 @@
 """CVFlow command-line entry point.
 
-The foundation ships the CLI skeleton only: argument parsing, ``--version``,
-``--help``, and an ``inspect`` command that validates its target and prints a
-placeholder. The actual dataset analysis is wired in by later batches; keeping
-the surface stable now means those batches only add behavior, not plumbing.
-
-Built on the standard-library :mod:`argparse` to keep the foundation
-dependency-free. Richer terminal output is introduced alongside the reporting
-work that needs it.
+The ``inspect`` command loads a dataset, runs the analysis engine, and prints a
+prioritized health report. Built on the standard-library :mod:`argparse` to keep
+dependencies minimal; richer terminal output can be layered on later without
+changing this surface.
 """
 
 from __future__ import annotations
@@ -18,9 +14,11 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from cvflow import __version__
+from cvflow.analysis import AnalysisEngine, CheckConfig, default_checks
 from cvflow.exceptions import DatasetError
 from cvflow.loaders import available_formats, load_dataset
-from cvflow.model import Dataset
+from cvflow.model import Severity
+from cvflow.report import render_report
 
 _PROG = "cvflow"
 
@@ -30,6 +28,7 @@ EXIT_OK = 0
 EXIT_USAGE = 2
 EXIT_TARGET_NOT_FOUND = 3
 EXIT_LOAD_ERROR = 4
+EXIT_ISSUES_FOUND = 1
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -72,6 +71,17 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Dataset format. Auto-detected when omitted.",
     )
+    inspect.add_argument(
+        "--no-images",
+        dest="check_images",
+        action="store_false",
+        help="Skip checks that read image bytes (faster; skips corrupt-image detection).",
+    )
+    inspect.add_argument(
+        "--strict",
+        action="store_true",
+        help="Exit non-zero if any WARNING is found (default: only ERRORs affect exit code).",
+    )
     inspect.set_defaults(func=_cmd_inspect)
 
     return parser
@@ -80,9 +90,8 @@ def build_parser() -> argparse.ArgumentParser:
 def _cmd_inspect(args: argparse.Namespace) -> int:
     """Handle ``cvflow inspect <path>``.
 
-    Loads the dataset and prints a concise load summary. Full statistics,
-    integrity checks, and quality analysis are wired in by later batches
-    (M3+); for now this proves the loaders work end to end.
+    Loads the dataset, runs the analysis engine, prints a health report, and
+    chooses an exit code based on the findings.
     """
     target: Path = args.path
     if not target.exists():
@@ -95,27 +104,17 @@ def _cmd_inspect(args: argparse.Namespace) -> int:
         print(f"{_PROG}: error: {exc}", file=sys.stderr)
         return EXIT_LOAD_ERROR
 
-    _print_load_summary(dataset)
+    config = CheckConfig(check_images=args.check_images)
+    engine = AnalysisEngine(default_checks(config))
+    issues = engine.run(dataset)
+
+    print(render_report(dataset, issues))
+
+    has_error = any(i.severity is Severity.ERROR for i in issues)
+    has_warning = any(i.severity is Severity.WARNING for i in issues)
+    if has_error or (args.strict and has_warning):
+        return EXIT_ISSUES_FOUND
     return EXIT_OK
-
-
-def _print_load_summary(dataset: Dataset) -> None:
-    """Print a short, human-friendly summary of a freshly loaded dataset."""
-    splits = dataset.splits
-    splits_text = ", ".join(splits) if splits else "—"
-
-    print(f"CVFlow {__version__}")
-    print(f"Loaded {dataset.format.upper()} dataset: {dataset.name}")
-    print(f"Root: {dataset.root}")
-    print("─" * 40)
-    print(f"{'Images':<14}{dataset.num_images:>10,}")
-    print(f"{'Annotations':<14}{dataset.num_annotations:>10,}")
-    print(f"{'Classes':<14}{dataset.num_classes:>10,}")
-    print(f"{'Splits':<14}{splits_text:>10}")
-    print()
-    print("Analysis (integrity, annotations, statistics, duplicates, leakage)")
-    print("is coming in the next batches. Track progress:")
-    print("https://github.com/RizwanMunawar/cvflow")
 
 
 def main(argv: Sequence[str] | None = None) -> int:

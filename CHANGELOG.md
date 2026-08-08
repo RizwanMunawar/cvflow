@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Integrity analysis (M3):
+  - Analysis engine (`AnalysisEngine`, `Check`, `CheckConfig`, `default_checks`)
+    that runs checks over a dataset and returns severity-sorted `Issue`s.
+  - Integrity checks: corrupt/unreadable images, broken image paths, invalid
+    image dimensions, missing/empty annotations, invalid annotation files,
+    invalid/unknown class ids, and duplicate filenames.
+  - Human-friendly text report (`cvflow.report.render_report`): overview,
+    health summary, prioritized "most important problems", and per-issue
+    what/why/where/next details.
+  - `cvflow inspect` now runs the engine and prints the health report, with
+    `--no-images` (skip image-byte checks) and `--strict` (fail on warnings);
+    exit code is non-zero when ERRORs (or, with `--strict`, WARNINGs) are found.
+  - `pillow` added as a runtime dependency (corrupt-image detection).
+
 - Dataset loaders (M2):
   - Normalized, format-agnostic dataset model (`BoundingBox`, `ImageItem`,
     `Dataset`) using canonical normalized `xyxy` box coordinates.
