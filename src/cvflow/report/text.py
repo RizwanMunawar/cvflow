@@ -28,6 +28,8 @@ def render_report(dataset: Dataset, issues: list[Issue], *, max_details: int = 1
     lines.extend(_priorities(issues))
     if issues:
         lines.append("")
+        lines.extend(_by_type(issues))
+        lines.append("")
         lines.extend(_details(issues, max_details))
     return "\n".join(lines)
 
@@ -65,6 +67,21 @@ def _priorities(issues: list[Issue], top: int = 5) -> list[str]:
         return lines
     for n, issue in enumerate(ranked, start=1):
         lines.append(f"{n}. [{issue.severity.label}] {issue.message}")
+    return lines
+
+
+def _by_type(issues: list[Issue]) -> list[str]:
+    """Aggregate counts per issue code, most severe / most frequent first."""
+    lines = ["Findings by Type", _RULE]
+    # Track count and worst severity per code.
+    counts: Counter[str] = Counter(issue.code for issue in issues)
+    worst: dict[str, Severity] = {}
+    for issue in issues:
+        current = worst.get(issue.code)
+        if current is None or issue.severity > current:
+            worst[issue.code] = issue.severity
+    for code, count in sorted(counts.items(), key=lambda kv: (-worst[kv[0]].rank, -kv[1])):
+        lines.append(f"{worst[code].label:<8}{count:>5}  {code}")
     return lines
 
 

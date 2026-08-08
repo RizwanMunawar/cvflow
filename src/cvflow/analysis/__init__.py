@@ -13,6 +13,7 @@ checks is independent and composable:
 
 from __future__ import annotations
 
+from cvflow.analysis.annotations import annotation_checks
 from cvflow.analysis.engine import AnalysisEngine, Check, CheckConfig
 from cvflow.analysis.integrity import integrity_checks
 
@@ -20,6 +21,7 @@ __all__ = [
     "AnalysisEngine",
     "Check",
     "CheckConfig",
+    "annotation_checks",
     "default_checks",
     "integrity_checks",
 ]
@@ -28,6 +30,6 @@ __all__ = [
 def default_checks(config: CheckConfig | None = None) -> list[Check]:
     """Return the default set of checks to run for ``cvflow inspect``.
 
-    Grows as new check families land (annotation geometry, statistics, …).
+    Grows as new check families land (statistics, duplicates, …).
     """
-    return integrity_checks(config)
+    return [*integrity_checks(config), *annotation_checks(config)]

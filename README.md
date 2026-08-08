@@ -114,7 +114,7 @@ CVFlow is built in small, reviewable batches:
 | **M1** | Project foundation — CLI, packaging, model, tests, CI ✅ |
 | **M2** | Dataset loaders — YOLO & COCO → normalized model ✅ |
 | **M3** | Integrity analysis — corrupt images, missing/invalid annotations ✅ |
-| **M4** | Annotation analysis — bounding-box validation & anomalies |
+| **M4** | Annotation analysis — bounding-box validation & anomalies ✅ |
 | **M5** | Dataset statistics — distributions & outlier detection |
 | **M6** | Duplicate detection — exact + perceptual hashing |
 | **M7** | Split-leakage detection — cross-split similarity |

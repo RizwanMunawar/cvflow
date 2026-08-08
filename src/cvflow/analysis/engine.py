@@ -37,10 +37,26 @@ class CheckConfig:
     rest, so new options don't ripple through every check.
     """
 
-    def __init__(self, *, check_images: bool = True) -> None:
+    def __init__(
+        self,
+        *,
+        check_images: bool = True,
+        out_of_bounds_eps: float = 1e-3,
+        tiny_box_side: float = 0.01,
+        huge_box_area: float = 0.9,
+        duplicate_iou: float = 0.95,
+    ) -> None:
         #: When False, checks that read image bytes (e.g. corrupt-image
         #: detection) are skipped. Useful for a fast, metadata-only pass.
         self.check_images = check_images
+        #: Tolerance before a normalized coordinate counts as out of bounds.
+        self.out_of_bounds_eps = out_of_bounds_eps
+        #: A box whose normalized width or height is below this is "tiny".
+        self.tiny_box_side = tiny_box_side
+        #: A box whose normalized area exceeds this is "huge" (near full frame).
+        self.huge_box_area = huge_box_area
+        #: Same-class boxes with IoU >= this are flagged as duplicates.
+        self.duplicate_iou = duplicate_iou
 
 
 class AnalysisEngine:
