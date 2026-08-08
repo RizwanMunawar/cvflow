@@ -31,6 +31,21 @@ def test_report_includes_overview_and_health() -> None:
     assert "1. [ERROR] corrupt" in report
 
 
+def test_report_by_type_groups_and_counts() -> None:
+    issues = [
+        Issue(code="tiny-box", severity=Severity.WARNING, message="t1"),
+        Issue(code="tiny-box", severity=Severity.WARNING, message="t2"),
+        Issue(code="corrupt-image", severity=Severity.ERROR, message="c"),
+    ]
+    report = render_report(_dataset(), issues)
+    assert "Findings by Type" in report
+    # Errors sort above warnings; tiny-box count is 2.
+    error_idx = report.index("corrupt-image")
+    tiny_idx = report.index("tiny-box")
+    assert error_idx < tiny_idx
+    assert "2  tiny-box" in report
+
+
 def test_report_clean_dataset() -> None:
     report = render_report(_dataset(), [])
     assert "No blocking problems detected" in report

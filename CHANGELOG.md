@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Annotation analysis (M4):
+  - Bounding-box geometry checks (`cvflow.analysis.annotations`): out-of-bounds
+    boxes, negative coordinates, degenerate (zero/negative area) boxes,
+    unusually tiny boxes, near-full-frame huge boxes, and duplicate/overlapping
+    same-class boxes (IoU-based).
+  - Tunable thresholds on `CheckConfig` (out-of-bounds epsilon, tiny side, huge
+    area, duplicate IoU).
+  - Report gains a "Findings by Type" section grouping issues by code with
+    counts, sorted by severity then frequency.
+  - Annotation checks wired into `cvflow inspect` via `default_checks()`.
+
 - Integrity analysis (M3):
   - Analysis engine (`AnalysisEngine`, `Check`, `CheckConfig`, `default_checks`)
     that runs checks over a dataset and returns severity-sorted `Issue`s.
