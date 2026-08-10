@@ -45,6 +45,10 @@ class CheckConfig:
         tiny_box_side: float = 0.01,
         huge_box_area: float = 0.9,
         duplicate_iou: float = 0.95,
+        objects_outlier_sigma: float = 3.0,
+        objects_outlier_floor: int = 10,
+        rare_class_fraction: float = 0.01,
+        class_imbalance_ratio: float = 100.0,
     ) -> None:
         #: When False, checks that read image bytes (e.g. corrupt-image
         #: detection) are skipped. Useful for a fast, metadata-only pass.
@@ -57,6 +61,14 @@ class CheckConfig:
         self.huge_box_area = huge_box_area
         #: Same-class boxes with IoU >= this are flagged as duplicates.
         self.duplicate_iou = duplicate_iou
+        #: Objects-per-image above mean + sigma*std (and the floor) is an outlier.
+        self.objects_outlier_sigma = objects_outlier_sigma
+        #: Absolute floor so tiny datasets don't produce object-count outliers.
+        self.objects_outlier_floor = objects_outlier_floor
+        #: A class with fewer than this fraction of all annotations is "rare".
+        self.rare_class_fraction = rare_class_fraction
+        #: Most-common : least-common class ratio above this flags imbalance.
+        self.class_imbalance_ratio = class_imbalance_ratio
 
 
 class AnalysisEngine:

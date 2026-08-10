@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from cvflow.model import Dataset, ImageItem, Issue, Location, Severity
+from cvflow.analysis import compute_statistics
+from cvflow.model import BoundingBox, Dataset, ImageItem, Issue, Location, Severity
 from cvflow.report import render_report
 
 
@@ -44,6 +45,27 @@ def test_report_by_type_groups_and_counts() -> None:
     tiny_idx = report.index("tiny-box")
     assert error_idx < tiny_idx
     assert "2  tiny-box" in report
+
+
+def test_report_includes_statistics_when_provided() -> None:
+    ds = Dataset(
+        name="d",
+        root="/tmp/d",
+        format="yolo",
+        images=[
+            ImageItem(path="a.jpg", split="train", boxes=[BoundingBox(0, 0.1, 0.1, 0.3, 0.3)]),
+            ImageItem(path="b.jpg", split="val"),
+        ],
+        class_names={0: "cat"},
+    )
+    stats = compute_statistics(ds)
+    report = render_report(ds, [], stats=stats)
+    assert "Dataset Statistics" in report
+    assert "Class distribution" in report
+    assert "cat" in report
+
+    # Without stats, the section is omitted.
+    assert "Dataset Statistics" not in render_report(ds, [])
 
 
 def test_report_clean_dataset() -> None:

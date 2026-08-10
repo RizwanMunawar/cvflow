@@ -11,12 +11,15 @@ from __future__ import annotations
 from cvflow.model.dataset import BoundingBox, Dataset, ImageItem
 from cvflow.model.issue import Issue, Location
 from cvflow.model.severity import Severity
+from cvflow.model.stats import DatasetStatistics, Summary
 
 __all__ = [
     "BoundingBox",
     "Dataset",
+    "DatasetStatistics",
     "ImageItem",
     "Issue",
     "Location",
     "Severity",
+    "Summary",
 ]
