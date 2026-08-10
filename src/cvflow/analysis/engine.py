@@ -4,10 +4,10 @@ A :class:`Check` inspects a normalized :class:`~cvflow.model.Dataset` and yields
 :class:`~cvflow.model.Issue` findings. The :class:`AnalysisEngine` runs a
 collection of checks and returns their findings sorted most-severe-first.
 
-This is the extensibility seam for all analysis: integrity (M3), annotation
-geometry (M4), statistics (M5), duplicates (M6), and leakage (M7) are all just
-checks registered here. Adding a rule never requires touching the engine, the
-CLI, or the reporter.
+This is the extensibility seam for all analysis: integrity, annotation
+geometry, statistics, duplicates, and leakage are all just checks registered
+here. Adding a rule never requires touching the engine, the CLI, or the
+reporter.
 """
 
 from __future__ import annotations

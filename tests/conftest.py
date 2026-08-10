@@ -2,7 +2,7 @@
 
 These create minimal-but-valid on-disk YOLO and COCO datasets in a temp dir so
 loader tests exercise real file parsing without shipping binary fixtures. Image
-files are empty placeholders — the M2 loaders never read image bytes.
+files are empty placeholders — the loaders never read image bytes.
 """
 
 from __future__ import annotations

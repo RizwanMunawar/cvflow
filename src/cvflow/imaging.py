@@ -7,6 +7,7 @@ gracefully rather than crashing). Pillow is a declared runtime dependency.
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 
 try:  # pragma: no cover - import guard
@@ -15,6 +16,10 @@ try:  # pragma: no cover - import guard
     _PILLOW_AVAILABLE = True
 except ImportError:  # pragma: no cover - Pillow is a declared dependency
     _PILLOW_AVAILABLE = False
+
+# dHash parameters: a (HASH_SIZE+1) x HASH_SIZE grayscale thumbnail yields
+# HASH_SIZE*HASH_SIZE = 64 comparison bits.
+_HASH_SIZE = 8
 
 
 def pillow_available() -> bool:

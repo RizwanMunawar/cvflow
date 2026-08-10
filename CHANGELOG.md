@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Dataset statistics (M5):
+- Dataset statistics:
   - `DatasetStatistics` / `Summary` model and `compute_statistics()` — class
     distribution, images-per-class, objects-per-image, box-area, aspect ratios,
     per-split counts, empty-image count (stdlib only, no numpy).
@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     aspect ratio, splits, class distribution with %).
   - `cvflow inspect` computes and shows statistics; `--no-stats` to skip.
 
-- Annotation analysis (M4):
+- Annotation analysis:
   - Bounding-box geometry checks (`cvflow.analysis.annotations`): out-of-bounds
     boxes, negative coordinates, degenerate (zero/negative area) boxes,
     unusually tiny boxes, near-full-frame huge boxes, and duplicate/overlapping
@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     counts, sorted by severity then frequency.
   - Annotation checks wired into `cvflow inspect` via `default_checks()`.
 
-- Integrity analysis (M3):
+- Integrity analysis:
   - Analysis engine (`AnalysisEngine`, `Check`, `CheckConfig`, `default_checks`)
     that runs checks over a dataset and returns severity-sorted `Issue`s.
   - Integrity checks: corrupt/unreadable images, broken image paths, invalid
@@ -45,7 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     exit code is non-zero when ERRORs (or, with `--strict`, WARNINGs) are found.
   - `pillow` added as a runtime dependency (corrupt-image detection).
 
-- Dataset loaders (M2):
+- Dataset loaders:
   - Normalized, format-agnostic dataset model (`BoundingBox`, `ImageItem`,
     `Dataset`) using canonical normalized `xyxy` box coordinates.
   - Pluggable loader abstraction (`DatasetLoader`) with a registry,
@@ -64,7 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Project foundation (M1):
+- Project foundation:
   - `cvflow` Python package with a `src/` layout and a modular structure that
     anticipates the target architecture (`model`, `loaders`, `analysis`,
     `report`, `cli`).

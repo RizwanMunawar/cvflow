@@ -10,11 +10,11 @@ Bounding boxes are stored as **normalized ``xyxy``** — ``(x_min, y_min, x_max,
 y_max)`` each expressed as a fraction of the image's width/height in ``[0, 1]``.
 This lets YOLO (already normalized) and COCO (absolute pixels + known image
 dimensions) unify *without* reading image files, and it makes boundary/size
-checks (M4) trivially image-size-independent.
+checks (annotation geometry) trivially image-size-independent.
 
 Loaders are deliberately **lenient**: an out-of-range or inverted box is a valid
 *representation* of bad data, not something to reject here. Deciding whether a
-value is a problem is the analysis engine's job (M3/M4).
+value is a problem is the analysis engine's job.
 """
 
 from __future__ import annotations
@@ -109,7 +109,7 @@ class ImageItem:
     Attributes:
         path: Path to the image, as recorded/resolved by the loader. May be
             relative to :attr:`Dataset.root`. Existence is not guaranteed here —
-            integrity checks (M3) verify it.
+            integrity checks verify it.
         split: Dataset split (``"train"``/``"val"``/``"test"``) or ``None``.
         width, height: Pixel dimensions when known (e.g. from COCO JSON);
             ``None`` for formats that don't record them (e.g. plain YOLO).
