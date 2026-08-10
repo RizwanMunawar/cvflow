@@ -3,7 +3,7 @@
 <p align="center">
   <strong>A linter for computer-vision datasets.</strong><br>
   Point it at a folder of images and labels, and it tells you what's broken,
-  duplicated, mislabeled, or suspicious — before it wastes a training run.
+  duplicated, mislabeled, or suspicious, before it wastes a training run.
 </p>
 
 <p align="center">
@@ -16,7 +16,7 @@
 
 ## The problem
 
-Most model bugs aren't in the model — they're in the data. A handful of corrupt
+Most model bugs aren't in the model; they're in the data. A handful of corrupt
 JPEGs, a few hundred boxes that spill off the edge of the frame, one class that's
 secretly 0.3% of your labels, or the same video frame sitting in both `train`
 and `val`. None of it throws an error. It just quietly drags your metrics around
@@ -35,21 +35,21 @@ cvflow inspect ./dataset
 Point CVFlow at a dataset and it answers the questions you'd otherwise check by
 hand, one script at a time:
 
-- **Is anything broken?** — corrupt/unreadable images, missing or invalid
+- **Is anything broken?** Corrupt/unreadable images, missing or invalid
   annotation files, broken paths, bad image dimensions, duplicate filenames.
-- **Are the annotations sane?** — boxes outside the image, negative or
+- **Are the annotations sane?** Boxes outside the image, negative or
   zero-area boxes, absurdly tiny or full-frame boxes, duplicate overlapping
   boxes, class IDs that don't exist.
-- **Is the distribution weird?** — class balance, objects per image, box sizes,
+- **Is the distribution weird?** Class balance, objects per image, box sizes,
   aspect ratios, and images that are statistical outliers.
-- **Do I have duplicates?** — exact copies (by hash) and near-duplicates (by
+- **Do I have duplicates?** Exact copies (by hash) and near-duplicates (by
   perceptual hash, with a similarity score).
-- **Are my splits leaking?** — the same (or nearly the same) image showing up in
+- **Are my splits leaking?** The same (or nearly the same) image showing up in
   more than one split. This one bites hardest on datasets cut from video.
 
 Every finding comes with a severity, a plain-English reason, where it is, the
 evidence behind it, and a suggested next step. CVFlow won't tell you your dataset
-is *wrong* — it shows you what looks off and lets you make the call.
+is *wrong*; it shows you what looks off and lets you make the call.
 
 ## Quick start
 
@@ -83,18 +83,18 @@ Most Important Problems
 1. [ERROR]   17 images are unreadable or corrupt.
 2. [ERROR]   21 bounding boxes extend outside the image boundaries.
 3. [WARNING] 143 unusually small bounding boxes detected.
-4. [WARNING] 127 highly similar image pairs between 'train' and 'val' — possible leakage.
+4. [WARNING] 127 highly similar image pairs between 'train' and 'val' (possible leakage).
 5. [WARNING] Class 'helmet' represents only 0.4% of annotations.
 ```
 
-The exit code is `0` when nothing's wrong, and non-zero when there are errors —
+The exit code is `0` when nothing's wrong, and non-zero when there are errors,
 so you can drop `cvflow inspect` straight into CI. (Add `--strict` to fail on
 warnings too.)
 
 ## How your dataset should be laid out
 
 CVFlow reads the two most common detection formats. The closer your folder is to
-one of the layouts below, the more it can audit — in particular, it needs to
+one of the layouts below, the more it can audit. In particular, it needs to
 find the **actual image files** on disk to check for corrupt images, duplicates,
 and split leakage.
 
@@ -133,7 +133,7 @@ names:                  # a list works too: [person, helmet]
   1: helmet
 ```
 
-A label file holds **one box per line**, in normalized YOLO format — class id
+A label file holds **one box per line**, in normalized YOLO format: class id
 followed by the box center and size, each as a fraction of the image (0–1):
 
 ```text
@@ -147,7 +147,7 @@ A few things worth knowing:
 - CVFlow finds a label by taking the image path and swapping `images/` →
   `labels/` and the extension → `.txt`. Keep that mirroring intact.
 - An image with **no label file, or an empty one, is treated as a background
-  image** (no objects) — that's a WARNING you can sanity-check, not an error.
+  image** (no objects); that's a WARNING you can sanity-check, not an error.
 - Supported image extensions: `.jpg .jpeg .png .bmp .webp .tif .tiff`.
 
 **No `data.yaml`?** CVFlow falls back to a plain `images/` + `labels/` pair. It
@@ -171,7 +171,7 @@ dataset/
         └── 000000009001.jpg
 ```
 
-Each JSON is standard COCO — `images`, `annotations`, and `categories`:
+Each JSON is standard COCO: `images`, `annotations`, and `categories`:
 
 ```jsonc
 {
@@ -186,12 +186,12 @@ Notes:
 - COCO `bbox` is **absolute pixels** `[x, y, width, height]` with `(x, y)` at the
   top-left. CVFlow normalizes it internally using each image's `width`/`height`,
   so a YOLO box and a COCO box end up meaning the same thing.
-- The **split** is inferred from the JSON filename — anything containing `train`,
+- The **split** is inferred from the JSON filename: anything containing `train`,
   `val`, or `test`. A single JSON with no such hint loads as one unnamed split.
 - To run the image-level checks (corrupt / duplicate / leakage), CVFlow needs the
   pixels. It looks for each `file_name` under the dataset root, then `images/`,
   then `images/<split>/` and `<split>/`. If it can't find them, it still audits
-  structure, annotations, and statistics — and tells you image checks were
+  structure, annotations, and statistics, and tells you image checks were
   skipped rather than inventing false positives.
 
 > **Rule of thumb:** structure and annotation checks run from the labels alone;
@@ -218,21 +218,21 @@ Exit codes: `0` clean, `1` problems found (errors, or warnings under `--strict`)
 > Don't tell developers their dataset is wrong. Show them what looks suspicious,
 > explain why, and let them decide.
 
-That principle is baked into the tool. Severity is used honestly —
+That principle is baked into the tool. Severity is used honestly:
 `ERROR` means something is objectively broken, `WARNING` means "worth a look",
 and `INFO` is just an observation. Statistical oddities and duplicates are never
 hard errors; they're candidates for review, phrased that way on purpose.
 
 ## Roadmap
 
-- ✅ **Project foundation** — CLI, packaging, model, tests, CI
-- ✅ **Dataset loaders** — YOLO & COCO → one normalized model
-- ✅ **Integrity analysis** — corrupt images, missing/invalid annotations
-- ✅ **Annotation analysis** — bounding-box validation & anomalies
-- ✅ **Dataset statistics** — distributions & outlier detection
-- ✅ **Duplicate detection** — exact + perceptual hashing
-- ✅ **Split-leakage detection** — cross-split similarity
-- ⬜ **Visualization** — eyeball the flagged samples
+- ✅ **Project foundation**: CLI, packaging, model, tests, CI
+- ✅ **Dataset loaders**: YOLO & COCO → one normalized model
+- ✅ **Integrity analysis**: corrupt images, missing/invalid annotations
+- ✅ **Annotation analysis**: bounding-box validation & anomalies
+- ✅ **Dataset statistics**: distributions & outlier detection
+- ✅ **Duplicate detection**: exact + perceptual hashing
+- ✅ **Split-leakage detection**: cross-split similarity
+- ⬜ **Visualization**: eyeball the flagged samples
 
 ## How it fits together
 
@@ -260,7 +260,7 @@ mypy                  # type-check (strict)
 pytest                # tests
 ```
 
-Contributions are welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md).
+Contributions are welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## License
 
