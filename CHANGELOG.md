@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Split-leakage detection:
+  - `SplitLeakageCheck` (`cvflow.analysis.leakage`) finds visually similar
+    images across dataset splits (train ↔ val ↔ test) via perceptual hashing —
+    potential train/validation leakage.
+  - Aggregated per split-pair: count of similar pairs, highest similarity, and
+    an example pair; tunable `leakage_max_hamming`, gated by `--no-images`,
+    no-op with a single split.
+
 - Duplicate detection:
   - Imaging helpers: `file_hash` (SHA-256), `perceptual_hash` (dHash), and
     `hamming_distance` — Pillow only, no new dependency.

@@ -51,6 +51,7 @@ class CheckConfig:
         class_imbalance_ratio: float = 100.0,
         near_duplicate_max_hamming: int = 5,
         max_reported_duplicate_pairs: int = 100,
+        leakage_max_hamming: int = 5,
     ) -> None:
         #: When False, checks that read image bytes (e.g. corrupt-image
         #: detection) are skipped. Useful for a fast, metadata-only pass.
@@ -75,6 +76,8 @@ class CheckConfig:
         self.near_duplicate_max_hamming = near_duplicate_max_hamming
         #: Cap on reported near-duplicate pairs (avoids flooding).
         self.max_reported_duplicate_pairs = max_reported_duplicate_pairs
+        #: Cross-split Hamming distance at/below which images are leakage candidates.
+        self.leakage_max_hamming = leakage_max_hamming
 
 
 class AnalysisEngine:
