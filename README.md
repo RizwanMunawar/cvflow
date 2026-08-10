@@ -115,7 +115,7 @@ CVFlow is built in small, reviewable batches:
 - ✅ **Annotation analysis** — bounding-box validation & anomalies
 - ✅ **Dataset statistics** — distributions & outlier detection
 - ✅ **Duplicate detection** — exact + perceptual hashing
-- ⬜ **Split-leakage detection** — cross-split similarity
+- ✅ **Split-leakage detection** — cross-split similarity
 - ⬜ **Visualization** — inspect flagged samples
 
 ## Architecture

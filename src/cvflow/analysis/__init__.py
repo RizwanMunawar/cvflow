@@ -17,6 +17,7 @@ from cvflow.analysis.annotations import annotation_checks
 from cvflow.analysis.duplicates import duplicate_checks
 from cvflow.analysis.engine import AnalysisEngine, Check, CheckConfig
 from cvflow.analysis.integrity import integrity_checks
+from cvflow.analysis.leakage import leakage_checks
 from cvflow.analysis.statistics import compute_statistics, statistics_checks
 
 __all__ = [
@@ -28,18 +29,17 @@ __all__ = [
     "default_checks",
     "duplicate_checks",
     "integrity_checks",
+    "leakage_checks",
     "statistics_checks",
 ]
 
 
 def default_checks(config: CheckConfig | None = None) -> list[Check]:
-    """Return the default set of checks to run for ``cvflow inspect``.
-
-    Grows as new check families land (leakage, …).
-    """
+    """Return the full set of checks to run for ``cvflow inspect``."""
     return [
         *integrity_checks(config),
         *annotation_checks(config),
         *statistics_checks(config),
         *duplicate_checks(config),
+        *leakage_checks(config),
     ]
