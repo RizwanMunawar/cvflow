@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Dataset statistics (M5):
+  - `DatasetStatistics` / `Summary` model and `compute_statistics()` — class
+    distribution, images-per-class, objects-per-image, box-area, aspect ratios,
+    per-split counts, empty-image count (stdlib only, no numpy).
+  - Statistical-anomaly checks: objects-per-image outliers (WARNING),
+    rare classes (INFO), and class imbalance (INFO), with configurable,
+    noise-resistant thresholds.
+  - Report gains a "Dataset Statistics" section (objects/image, box size,
+    aspect ratio, splits, class distribution with %).
+  - `cvflow inspect` computes and shows statistics; `--no-stats` to skip.
+
 - Annotation analysis (M4):
   - Bounding-box geometry checks (`cvflow.analysis.annotations`): out-of-bounds
     boxes, negative coordinates, degenerate (zero/negative area) boxes,

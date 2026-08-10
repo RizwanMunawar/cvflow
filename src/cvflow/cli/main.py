@@ -14,7 +14,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from cvflow import __version__
-from cvflow.analysis import AnalysisEngine, CheckConfig, default_checks
+from cvflow.analysis import AnalysisEngine, CheckConfig, compute_statistics, default_checks
 from cvflow.exceptions import DatasetError
 from cvflow.loaders import available_formats, load_dataset
 from cvflow.model import Severity
@@ -82,6 +82,12 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Exit non-zero if any WARNING is found (default: only ERRORs affect exit code).",
     )
+    inspect.add_argument(
+        "--no-stats",
+        dest="no_stats",
+        action="store_true",
+        help="Skip the dataset statistics section of the report.",
+    )
     inspect.set_defaults(func=_cmd_inspect)
 
     return parser
@@ -107,8 +113,9 @@ def _cmd_inspect(args: argparse.Namespace) -> int:
     config = CheckConfig(check_images=args.check_images)
     engine = AnalysisEngine(default_checks(config))
     issues = engine.run(dataset)
+    stats = None if args.no_stats else compute_statistics(dataset)
 
-    print(render_report(dataset, issues))
+    print(render_report(dataset, issues, stats=stats))
 
     has_error = any(i.severity is Severity.ERROR for i in issues)
     has_warning = any(i.severity is Severity.WARNING for i in issues)

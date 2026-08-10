@@ -54,6 +54,15 @@ def test_inspect_explicit_format(
     assert "COCO" in out
 
 
+def test_inspect_shows_and_hides_statistics(
+    clean_dataset: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    main(["inspect", str(clean_dataset)])
+    assert "Dataset Statistics" in capsys.readouterr().out
+    main(["inspect", str(clean_dataset), "--no-stats"])
+    assert "Dataset Statistics" not in capsys.readouterr().out
+
+
 def test_inspect_returns_nonzero_on_errors(
     integrity_dataset: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
