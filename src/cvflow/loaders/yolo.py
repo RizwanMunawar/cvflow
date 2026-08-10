@@ -10,7 +10,7 @@ Supports the two layouts seen in the wild:
 
 Label files contain one annotation per line: ``class_id cx cy w h`` with all
 box values normalized to ``[0, 1]``. Malformed lines are skipped by the loader;
-reporting invalid annotation files is the integrity engine's job (M3).
+reporting invalid annotation files is the integrity engine's job.
 """
 
 from __future__ import annotations
@@ -200,7 +200,7 @@ def _parse_label_file(label_path: Path) -> list[BoundingBox]:
     for line in label_path.read_text(encoding="utf-8").splitlines():
         parts = line.split()
         if len(parts) < 5:
-            continue  # blank or malformed; M3 reports invalid files
+            continue  # blank or malformed; integrity checks report invalid files
         try:
             class_id = int(float(parts[0]))
             cx, cy, w, h = (float(v) for v in parts[1:5])

@@ -12,33 +12,9 @@ from collections.abc import Iterable
 from pathlib import Path
 
 from cvflow.analysis.engine import Check, CheckConfig
+from cvflow.analysis.paths import resolve_image_path
 from cvflow.imaging import is_readable_image
 from cvflow.model import Dataset, ImageItem, Issue, Location, Severity
-
-
-def _resolve_image_path(root: str, item: ImageItem) -> Path | None:
-    """Best-effort resolution of an image path to an existing file.
-
-    Handles both absolute paths (YOLO) and bare file names (COCO) by trying a
-    few common layouts relative to the dataset root. Returns ``None`` when the
-    file cannot be found.
-    """
-    raw = Path(item.path)
-    if raw.is_absolute() and raw.is_file():
-        return raw
-
-    root_path = Path(root)
-    candidates = [
-        root_path / item.path,
-        root_path / "images" / item.path,
-    ]
-    if item.split:
-        candidates.append(root_path / "images" / item.split / Path(item.path).name)
-        candidates.append(root_path / item.split / Path(item.path).name)
-    for candidate in candidates:
-        if candidate.is_file():
-            return candidate
-    return raw if raw.is_file() else None
 
 
 class DuplicateFilenameCheck(Check):
@@ -191,7 +167,7 @@ class ImageFileCheck(Check):
         if not dataset.images:
             return
 
-        resolved = {id(item): _resolve_image_path(dataset.root, item) for item in dataset.images}
+        resolved = {id(item): resolve_image_path(dataset.root, item) for item in dataset.images}
         found = [p for p in resolved.values() if p is not None]
 
         if not found:

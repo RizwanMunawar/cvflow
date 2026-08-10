@@ -4,10 +4,10 @@ A :class:`Check` inspects a normalized :class:`~cvflow.model.Dataset` and yields
 :class:`~cvflow.model.Issue` findings. The :class:`AnalysisEngine` runs a
 collection of checks and returns their findings sorted most-severe-first.
 
-This is the extensibility seam for all analysis: integrity (M3), annotation
-geometry (M4), statistics (M5), duplicates (M6), and leakage (M7) are all just
-checks registered here. Adding a rule never requires touching the engine, the
-CLI, or the reporter.
+This is the extensibility seam for all analysis: integrity, annotation
+geometry, statistics, duplicates, and leakage are all just checks registered
+here. Adding a rule never requires touching the engine, the CLI, or the
+reporter.
 """
 
 from __future__ import annotations
@@ -49,6 +49,8 @@ class CheckConfig:
         objects_outlier_floor: int = 10,
         rare_class_fraction: float = 0.01,
         class_imbalance_ratio: float = 100.0,
+        near_duplicate_max_hamming: int = 5,
+        max_reported_duplicate_pairs: int = 100,
     ) -> None:
         #: When False, checks that read image bytes (e.g. corrupt-image
         #: detection) are skipped. Useful for a fast, metadata-only pass.
@@ -69,6 +71,10 @@ class CheckConfig:
         self.rare_class_fraction = rare_class_fraction
         #: Most-common : least-common class ratio above this flags imbalance.
         self.class_imbalance_ratio = class_imbalance_ratio
+        #: Perceptual-hash Hamming distance at/below which images are near-dupes.
+        self.near_duplicate_max_hamming = near_duplicate_max_hamming
+        #: Cap on reported near-duplicate pairs (avoids flooding).
+        self.max_reported_duplicate_pairs = max_reported_duplicate_pairs
 
 
 class AnalysisEngine:

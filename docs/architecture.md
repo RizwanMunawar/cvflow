@@ -41,7 +41,7 @@ foundation:
 - **`Location`** — where a finding was detected (path, split, annotation index).
 
 The normalized dataset representation (images, annotations, splits, classes)
-lands in M2 alongside the first loaders. Because the analysis engine only ever
+lands alongside the first loaders. Because the analysis engine only ever
 sees the normalized model, loaders and rules evolve independently.
 
 ### `cvflow.loaders` — dataset loaders
