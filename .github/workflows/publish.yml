@@ -1,8 +1,9 @@
 name: Publish to PyPI
 
 # Publishes CVFlow to PyPI when a GitHub Release is published.
-# Authentication uses PyPI Trusted Publishing (OIDC) — no API token or secret
-# is stored in the repository. See docs/releasing.md for the one-time setup.
+# Authentication uses PyPI Trusted Publishing (OIDC): no API token or secret
+# is stored in the repository. The matching pending publisher is configured on
+# PyPI (project cvflow, this repo, workflow publish.yml, environment pypi).
 
 on:
   release:
