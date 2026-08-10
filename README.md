@@ -114,7 +114,7 @@ CVFlow is built in small, reviewable batches:
 - ✅ **Integrity analysis** — corrupt images, missing/invalid annotations
 - ✅ **Annotation analysis** — bounding-box validation & anomalies
 - ✅ **Dataset statistics** — distributions & outlier detection
-- ⬜ **Duplicate detection** — exact + perceptual hashing
+- ✅ **Duplicate detection** — exact + perceptual hashing
 - ⬜ **Split-leakage detection** — cross-split similarity
 - ⬜ **Visualization** — inspect flagged samples
 

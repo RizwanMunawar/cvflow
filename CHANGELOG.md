@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Duplicate detection:
+  - Imaging helpers: `file_hash` (SHA-256), `perceptual_hash` (dHash), and
+    `hamming_distance` — Pillow only, no new dependency.
+  - `ExactDuplicateCheck` groups byte-identical images; `NearDuplicateCheck`
+    finds visually similar images with a similarity score.
+  - Shared `resolve_image_path` extracted to `cvflow.analysis.paths` and reused
+    by the integrity checks.
+  - Tunable via `CheckConfig` (near-duplicate Hamming threshold, reported-pair
+    cap); both honor `--no-images` and degrade cleanly when images are absent.
+
 - Dataset statistics:
   - `DatasetStatistics` / `Summary` model and `compute_statistics()` — class
     distribution, images-per-class, objects-per-image, box-area, aspect ratios,
