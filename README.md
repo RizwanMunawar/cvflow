@@ -262,11 +262,7 @@ pytest                # tests
 
 Contributions are welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
-## Author
-
-**Muhammad Rizwan Munawar** &nbsp;·&nbsp; Computer Vision Engineer @ [Ultralytics](https://ultralytics.com) &nbsp;·&nbsp; Islamabad, Pakistan
-
-Solving real-world problems with computer vision, open source, and technical writing. If CVFlow saves you time, a ⭐ on the repo is always appreciated.
+## Connect
 
 <p>
   <a href="https://rizwanai.com"><img alt="Website" src="https://img.shields.io/badge/Website-rizwanai.com-2ea44f?style=for-the-badge&logo=googlechrome&logoColor=white"></a>
@@ -277,5 +273,3 @@ Solving real-world problems with computer vision, open source, and technical wri
 ## License
 
 CVFlow is released under the [MIT License](LICENSE).
-
-Copyright © 2026 Muhammad Rizwan Munawar
