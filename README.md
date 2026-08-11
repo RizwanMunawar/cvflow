@@ -11,8 +11,20 @@
   <img alt="Python" src="https://img.shields.io/badge/python-3.9%2B-blue">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-green">
 </p>
-
----
+<p align="center">
+  <a href="https://rizwanai.com">
+    <img src="https://img.shields.io/badge/🌐%20rizwanai.com-deekpink?" alt="Portfolio">
+  </a>
+  <a href="https://github.com/RizwanMunawar">
+    <img src="https://img.shields.io/badge/%20Projects%20%26%20Open%20Source-orange?&logo=github&logoColor=white" alt="GitHub">
+  </a>
+  <a href="https://x.com/muhammdrizwanmr">
+    <img src="https://img.shields.io/badge/Follow%20My%20Work-green?&logo=x&logoColor=white" alt="X">
+  </a>
+  <a href="https://www.linkedin.com/in/muhammadrizwanmunawar/">
+    <img src="https://img.shields.io/badge/LinkedIn-Connect%20%26%20Collaborate-magenta?&logo=linkedin&logoColor=white" alt="LinkedIn">
+  </a>
+</p>
 
 ## The problem
 
@@ -261,14 +273,6 @@ pytest                # tests
 ```
 
 Contributions are welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
-
-## Connect
-
-<p>
-  <a href="https://rizwanai.com"><img alt="Website" src="https://img.shields.io/badge/Website-rizwanai.com-2ea44f?style=for-the-badge&logo=googlechrome&logoColor=white"></a>
-  <a href="https://github.com/RizwanMunawar"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-RizwanMunawar-181717?style=for-the-badge&logo=github&logoColor=white"></a>
-  <a href="https://x.com/muhammdrizwanmr"><img alt="X" src="https://img.shields.io/badge/X-@muhammdrizwanmr-000000?style=for-the-badge&logo=x&logoColor=white"></a>
-</p>
 
 ## License
 
