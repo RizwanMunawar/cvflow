@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import subprocess
 import sys
+from importlib import import_module
 from pathlib import Path
 
 import pytest
@@ -18,6 +19,11 @@ from cvflow.cli.main import (
     build_parser,
     main,
 )
+from cvflow.exceptions import DatasetError
+
+# `cvflow.cli` re-exports main(), so `cvflow.cli.main` as an attribute is the
+# function, not the module. Ask the import system for the module itself.
+cli = import_module("cvflow.cli.main")
 
 
 def test_version_flag(capsys: pytest.CaptureFixture[str]) -> None:
@@ -192,3 +198,44 @@ def test_inspect_note_is_honest_without_image_checks(
 
     assert "quick" in captured.err
     assert "1-5 minutes" not in captured.err
+
+
+def test_inspect_without_a_path_uses_the_sample(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """`cvflow inspect` with no argument must still do something useful."""
+    sample = tmp_path / "coco128"
+    (sample / "images" / "train").mkdir(parents=True)
+    (sample / "labels" / "train").mkdir(parents=True)
+    (sample / "data.yaml").write_text("names:\n  0: cat\ntrain: images/train\n")
+    (sample / "images" / "train" / "a.jpg").touch()
+    (sample / "labels" / "train" / "a.txt").write_text("0 0.5 0.5 0.2 0.2\n")
+
+    calls: list[str] = []
+
+    def fake_ensure(**kwargs: object) -> Path:
+        calls.append("fetched")
+        return sample
+
+    monkeypatch.setattr(cli, "ensure_sample", fake_ensure)
+
+    assert main(["inspect", "--no-images"]) == EXIT_OK
+    assert calls == ["fetched"]
+    assert "CVFlow Dataset Health" in capsys.readouterr().out
+
+
+def test_inspect_reports_a_failed_sample_download(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    def boom(**kwargs: object) -> Path:
+        raise DatasetError("could not download the sample dataset (offline)")
+
+    monkeypatch.setattr(cli, "ensure_sample", boom)
+
+    assert main(["inspect"]) == EXIT_LOAD_ERROR
+    assert "could not download" in capsys.readouterr().err
+
+
+def test_path_is_optional_in_the_parser() -> None:
+    args = build_parser().parse_args(["inspect"])
+    assert args.path is None

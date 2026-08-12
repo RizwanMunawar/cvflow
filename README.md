@@ -13,20 +13,18 @@
 </p>
 <p align="center">
   <a href="https://rizwanai.com">
-    <img src="https://img.shields.io/badge/🌐%20rizwanai.com-deekpink?" alt="Portfolio">
+    <img src="https://img.shields.io/badge/🌐%20rizwanai.com-purple?" alt="Portfolio">
   </a>
   <a href="https://github.com/RizwanMunawar">
-    <img src="https://img.shields.io/badge/%20Projects%20%26%20Open%20Source-orange?&logo=github&logoColor=white" alt="GitHub">
+    <img src="https://img.shields.io/badge/%20Projects%20%26%20Open%20Source-yellow?&logo=github&logoColor=white" alt="GitHub">
   </a>
   <a href="https://x.com/muhammdrizwanmr">
-    <img src="https://img.shields.io/badge/Follow%20My%20Work-green?&logo=x&logoColor=white" alt="X">
+    <img src="https://img.shields.io/badge/Follow%20My%20Work-black?&logo=x&logoColor=white" alt="X">
   </a>
   <a href="https://www.linkedin.com/in/muhammadrizwanmunawar/">
-    <img src="https://img.shields.io/badge/LinkedIn-Connect%20%26%20Collaborate-magenta?&logo=linkedin&logoColor=white" alt="LinkedIn">
+    <img src="https://img.shields.io/badge/LinkedIn-Connect%20%26%20Collaborate-dodgerblue?&logo=linkedin&logoColor=white" alt="LinkedIn">
   </a>
 </p>
-
----
 
 ## Quickstart
 
@@ -34,9 +32,14 @@ Three commands. No config, no account, no setup.
 
 ```bash
 pip install cvflow                     # 1. install
-cvflow inspect ./dataset               # 2. check a dataset  (prints a report)
-cvflow inspect ./dataset --serve       # 3. or open the dashboard in your browser
+cvflow inspect                         # 2. no dataset? it fetches coco128 and checks that
+cvflow inspect ./dataset --serve       # 3. or point it at yours and open the dashboard
 ```
+
+Running `cvflow inspect` with no path downloads Ultralytics' `coco128` sample
+(about 7 MB) into a cache directory and inspects it, so you can see exactly what
+the tool does before arranging any data. It is fetched once and reused; set
+`CVFLOW_CACHE` to choose where it lands.
 
 That's the whole tool. `./dataset` is any folder holding a YOLO or COCO dataset;
 CVFlow works out which one it is, and whether it holds boxes, polygons or
@@ -62,13 +65,15 @@ oriented boxes.
    pip install cvflow
    ```
 
-3. **Try it on a real dataset.** If you don't have one handy, the Ultralytics
-   `coco128` sample works well: download and unzip it, then point CVFlow at the
-   folder:
+3. **Try it.** With no dataset of your own, just run it: CVFlow downloads and
+   unzips the `coco128` sample for you.
 
    ```bash
-   cvflow inspect ./coco128 --serve
+   cvflow inspect --serve
    ```
+
+   Already have a dataset? Point at its folder instead:
+   `cvflow inspect ./my-dataset --serve`
 
 4. Your browser opens `http://localhost:8000` with the dashboard. Press
    `Ctrl+C` in the terminal when you're finished.
@@ -81,8 +86,6 @@ python -m cvflow inspect ./dataset --serve
 ```
 
 </details>
-
----
 
 ## What you get
 
@@ -180,8 +183,6 @@ Most Important Problems
 The exit code is `0` when nothing's wrong and non-zero when there are errors, so
 `cvflow inspect` drops straight into CI. Add `--strict` to fail on warnings too.
 
----
-
 ## What it checks
 
 Point CVFlow at a dataset and it answers the questions you'd otherwise check by
@@ -207,8 +208,6 @@ you always know how your labels were read.
 Every finding carries a severity, a plain-English reason, where it is, the
 evidence behind it, and a suggested next step. CVFlow won't tell you your dataset
 is *wrong*; it shows you what looks off and lets you make the call.
-
----
 
 ## How your dataset should be laid out
 
@@ -316,13 +315,13 @@ Notes:
 > corrupt-image, duplicate, and leakage checks need the image files reachable
 > from the dataset root. Point CVFlow at the folder that contains both.
 
----
-
 ## Command reference
 
 ```text
-cvflow inspect <path> [options]
+cvflow inspect [path] [options]
 
+  path                       Dataset root. Omitted, CVFlow downloads and
+                             inspects the coco128 sample.
   -f, --format {yolo,coco}   Force a format instead of auto-detecting.
       --no-images            Skip checks that read image bytes (much faster;
                              also skips corrupt/duplicate/leakage detection).
@@ -347,6 +346,9 @@ Exit codes: `0` clean · `1` problems found (errors, or warnings under `--strict
 ### Common recipes
 
 ```bash
+# Kick the tyres with no dataset of your own
+cvflow inspect --serve
+
 # Fast structural check on a huge dataset (skips reading image bytes)
 cvflow inspect ./dataset --no-images
 
@@ -359,8 +361,6 @@ cvflow inspect ./dataset --format coco
 # Share the dashboard with a teammate on your network
 cvflow inspect ./dataset --serve --host 0.0.0.0 --port 9000
 ```
-
----
 
 ## Design philosophy
 
@@ -383,7 +383,7 @@ estimate is labeled an estimate, with its formula on screen.
 - ✅ **Duplicate detection**: exact + perceptual hashing
 - ✅ **Split-leakage detection**: cross-split similarity
 - ✅ **Dashboard**: one browser page for the whole report
-- ⬜ **Visualization**: eyeball the flagged samples
+- ✅ **Visualization**: eyeball the flagged samples
 
 ## How it fits together
 

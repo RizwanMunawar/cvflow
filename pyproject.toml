@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "cvflow"
-version = "0.0.2"
+version = "0.0.3"
 description = "ESLint / DevTools for computer-vision datasets: inspect datasets for broken, duplicated, inconsistent, or suspicious data."
 readme = "README.md"
 requires-python = ">=3.9"
