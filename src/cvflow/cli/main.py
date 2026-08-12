@@ -24,6 +24,7 @@ from cvflow.exceptions import DatasetError
 from cvflow.loaders import available_formats, load_dataset
 from cvflow.model import Dataset, Issue, Severity
 from cvflow.report import render_report
+from cvflow.sample import ensure_sample
 
 _PROG = "cvflow"
 
@@ -66,7 +67,12 @@ def build_parser() -> argparse.ArgumentParser:
     inspect.add_argument(
         "path",
         type=Path,
-        help="Path to the dataset root directory.",
+        nargs="?",
+        default=None,
+        help=(
+            "Path to the dataset root directory. Omit it to download and inspect "
+            "the coco128 sample, so you can see what CVFlow does without one."
+        ),
     )
     inspect.add_argument(
         "-f",
@@ -175,8 +181,16 @@ def _cmd_inspect(args: argparse.Namespace) -> int:
     Loads the dataset, runs the analysis engine, prints a health report, and
     chooses an exit code based on the findings.
     """
-    target: Path = args.path
-    if not target.exists():
+    target: Path | None = args.path
+    if target is None:
+        # No dataset to hand: fetch the sample so the tool is useful on the
+        # first run, before anyone has arranged their data for it.
+        try:
+            target = ensure_sample(echo=lambda message: print(message, file=sys.stderr, flush=True))
+        except DatasetError as exc:
+            print(f"{_PROG}: error: {exc}", file=sys.stderr)
+            return EXIT_LOAD_ERROR
+    elif not target.exists():
         print(f"{_PROG}: error: path does not exist: {target}", file=sys.stderr)
         return EXIT_TARGET_NOT_FOUND
 

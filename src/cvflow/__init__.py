@@ -24,7 +24,7 @@ def _resolve_version() -> str:
     try:
         return metadata.version("cvflow")
     except metadata.PackageNotFoundError:  # pragma: no cover - editable/source use
-        return "0.0.2"
+        return "0.0.3"
 
 
 __version__ = _resolve_version()

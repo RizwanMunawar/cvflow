@@ -147,6 +147,13 @@ The boundary is one-directional like every other seam here: the design layer
 reads the model and never writes to it, so the UI can be redesigned without
 touching a single check.
 
+### `cvflow.sample`: the demo dataset
+Downloads and unpacks Ultralytics' `coco128` into a cache directory when
+`cvflow inspect` is run with no path, so the tool is useful on the first run.
+Standard library only, cached after the first fetch, and every archive member is
+resolved and checked before extraction so a crafted zip cannot write outside the
+cache. Nothing here runs unless the path is omitted.
+
 ### `cvflow.cli`: command-line interface
 The user-facing entry point (`cvflow inspect`). Parses arguments, wires
 load → analyze → report, and chooses the process exit code from the findings.
