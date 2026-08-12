@@ -52,6 +52,10 @@ class CheckConfig:
         near_duplicate_max_hamming: int = 5,
         max_reported_duplicate_pairs: int = 100,
         leakage_max_hamming: int = 5,
+        rectangular_mask_fill: float = 0.98,
+        sliver_mask_fill: float = 0.05,
+        obb_corner_tolerance: float = 5.0,
+        obb_flat_tolerance: float = 1.0,
     ) -> None:
         #: When False, checks that read image bytes (e.g. corrupt-image
         #: detection) are skipped. Useful for a fast, metadata-only pass.
@@ -78,6 +82,14 @@ class CheckConfig:
         self.max_reported_duplicate_pairs = max_reported_duplicate_pairs
         #: Cross-split Hamming distance at/below which images are leakage candidates.
         self.leakage_max_hamming = leakage_max_hamming
+        #: A mask filling at least this much of its own box is really a rectangle.
+        self.rectangular_mask_fill = rectangular_mask_fill
+        #: A mask filling at most this much of its own box is a sliver.
+        self.sliver_mask_fill = sliver_mask_fill
+        #: Degrees a corner of an oriented box may differ from square.
+        self.obb_corner_tolerance = obb_corner_tolerance
+        #: Degrees within the image axes that counts as "not rotated at all".
+        self.obb_flat_tolerance = obb_flat_tolerance
 
 
 class AnalysisEngine:

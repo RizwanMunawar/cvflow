@@ -86,7 +86,7 @@ class ObjectsPerImageOutlierCheck(Check):
             yield Issue(
                 code="objects-per-image-outlier",
                 severity=Severity.WARNING,
-                message=f"Image contains {item.num_boxes} objects — a statistical outlier.",
+                message=f"Image contains {item.num_boxes} objects, a statistical outlier.",
                 why=(
                     f"Typical images hold about {typical_low} to {typical_high} objects "
                     f"(mean {mean:.1f}); this one has far more."

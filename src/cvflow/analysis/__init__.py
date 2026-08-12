@@ -18,6 +18,7 @@ from cvflow.analysis.duplicates import duplicate_checks
 from cvflow.analysis.engine import AnalysisEngine, Check, CheckConfig
 from cvflow.analysis.integrity import integrity_checks
 from cvflow.analysis.leakage import leakage_checks
+from cvflow.analysis.shapes import shape_checks
 from cvflow.analysis.statistics import compute_statistics, statistics_checks
 
 __all__ = [
@@ -30,6 +31,7 @@ __all__ = [
     "duplicate_checks",
     "integrity_checks",
     "leakage_checks",
+    "shape_checks",
     "statistics_checks",
 ]
 
@@ -39,6 +41,7 @@ def default_checks(config: CheckConfig | None = None) -> list[Check]:
     return [
         *integrity_checks(config),
         *annotation_checks(config),
+        *shape_checks(config),
         *statistics_checks(config),
         *duplicate_checks(config),
         *leakage_checks(config),

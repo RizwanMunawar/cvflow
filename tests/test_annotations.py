@@ -100,3 +100,36 @@ def test_thresholds_are_configurable() -> None:
     checks = annotation_checks(lenient)
     tiny = [i for c in checks for i in c.run(ds) if i.code == "tiny-box"]
     assert tiny == []
+
+
+def test_box_findings_name_the_box_they_flag() -> None:
+    """Every box-level finding records which annotation it means.
+
+    The text report prints it, and the dashboard uses it to select and
+    highlight exactly that box, so a finding without it cannot be acted on.
+    """
+    dataset = Dataset(name="d", root=".", format="yolo")
+    dataset.images.append(
+        ImageItem(
+            path="a.jpg",
+            boxes=[
+                BoundingBox(0, 0.1, 0.1, 0.2, 0.2),  # fine
+                BoundingBox(0, -0.2, 0.1, 0.3, 0.4),  # out of bounds
+                BoundingBox(0, 0.5, 0.5, 0.5, 0.6),  # degenerate
+                BoundingBox(0, 0.7, 0.7, 0.7005, 0.7005),  # tiny
+                BoundingBox(0, 0.0, 0.0, 1.0, 1.0),  # huge
+            ],
+        )
+    )
+
+    issues = [issue for check in annotation_checks(CheckConfig()) for issue in check.run(dataset)]
+    flagged = {
+        issue.code: issue.location.annotation_index
+        for issue in issues
+        if issue.location is not None
+    }
+
+    assert flagged["box-out-of-bounds"] == 1
+    assert flagged["degenerate-box"] == 2
+    assert flagged["tiny-box"] == 3
+    assert flagged["huge-box"] == 4

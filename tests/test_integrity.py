@@ -82,13 +82,28 @@ def test_invalid_class_id_skipped_without_class_map() -> None:
 
 
 def test_empty_annotation_check() -> None:
+    """Each empty image is its own finding, naming the file to look at."""
     ds = _make_dataset(
         [ImageItem(path="a.jpg"), ImageItem(path="b.jpg", boxes=[BoundingBox(0, 0, 0, 1, 1)])],
         {0: "cat"},
     )
     issues = list(EmptyAnnotationCheck().run(ds))
     assert len(issues) == 1
-    assert issues[0].evidence["count"] == 1
+    assert issues[0].location is not None
+    assert issues[0].location.path == "a.jpg"
+
+
+def test_empty_annotation_check_summarizes_a_long_tail() -> None:
+    """A dataset that is mostly background images must not flood the list."""
+    images = [ImageItem(path=f"{n}.jpg") for n in range(60)]
+    issues = list(EmptyAnnotationCheck().run(_make_dataset(images, {0: "cat"})))
+
+    named = [issue for issue in issues if issue.location is not None]
+    summary = [issue for issue in issues if issue.location is None]
+    assert len(named) == 50
+    assert len(summary) == 1
+    assert summary[0].evidence["count"] == 10
+    assert len(summary[0].evidence["examples"]) == 10
 
 
 def test_invalid_image_dimension_check() -> None:

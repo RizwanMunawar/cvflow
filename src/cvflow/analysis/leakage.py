@@ -88,7 +88,7 @@ class SplitLeakageCheck(Check):
             severity=Severity.WARNING,
             message=(
                 f"{len(matches)} highly similar image pair(s) between "
-                f"'{split_a}' and '{split_b}' — possible dataset leakage."
+                f"'{split_a}' and '{split_b}': possible dataset leakage."
             ),
             why=(
                 "Visually near-identical images appear in different splits. If the "

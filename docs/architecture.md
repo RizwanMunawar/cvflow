@@ -27,8 +27,9 @@ Analysis engine        cvflow.analysis         runs a list of checks, sorts find
    ▼
 Issues + Severity      cvflow.model.Issue      uniform findings
    │
-   ▼
-Report                 cvflow.report           human-friendly, prioritized output
+   ├──▶ Report          cvflow.report           human-friendly, prioritized text
+   │
+   └──▶ Design          cvflow.design           single-page browser dashboard
 ```
 
 Data flows one direction. Each stage depends only on the stage before it through
@@ -63,6 +64,13 @@ format means adding a loader and registering it; nothing downstream changes.
 Loaders are deliberately **lenient**: they represent whatever is on disk
 (including out-of-range or malformed values) and leave judgment to the analysis
 engine.
+
+They also record the **task** they read: `detect`, `segment` or `obb`. One YOLO
+text format serves all three, told apart by how many numbers follow the class id;
+polygons and oriented boxes are reduced to their axis-aligned extent so every
+check works on one geometry, while `Dataset.task` remembers what they came from.
+That matters on the way back out: the editor refuses to rewrite anything but
+plain detection labels.
 
 ### `cvflow.analysis`: the analysis engine and checks
 - **`Check`**: the base class; `run(dataset) -> Iterable[Issue]`.
@@ -105,6 +113,40 @@ most-important problems, findings-by-type, and per-issue detail. Reporting is
 separate from analysis so new output formats (e.g. JSON) can be added without
 touching the checks.
 
+### `cvflow.design`: the visual layer
+Everything the user sees in a browser. It is a **sibling** of `cvflow.report`,
+not a layer above it: both consume `Issue`s and neither knows about the other.
+
+- **`payload.build_payload()`**: the data contract. Turns a `Dataset`, its
+  findings, and its statistics into one plain JSON-serializable dict, with every
+  aggregate precomputed in Python — class ranking and cumulative coverage,
+  objects/size/shape histograms, the box-center heatmap, per-code counts, and
+  the images carrying the most findings. The page never reasons about the
+  dataset itself; adding a chart usually means adding one function here.
+- **`assets/`**: `dashboard.html`, `dashboard.css`, `dashboard.js` — the UI as
+  editable design artifacts. No framework, no build step, no external requests.
+  The page is a tabbed view (Overview / Classes / Geometry / Findings); every
+  tab is rendered once at load and shown or hidden, so switching costs nothing
+  and no chart has to re-measure itself.
+- **`assets/vendor/`**: Chart.js and the Geist fonts, inlined into the page at
+  render time. Vendoring them keeps `pip install cvflow` the only install step —
+  no Node toolchain, no CDN, and the page still renders offline. Versions and
+  licenses are listed in `assets/vendor/README.md`.
+- **`editor.Editor`**: the write path. Resolves an image the browser asks for,
+  returns its bytes and boxes, and writes edited boxes back to the YOLO label
+  file. Every path is confined to the dataset root, and only YOLO is written —
+  COCO's shared JSON is other tooling's to own, so it stays read-only.
+- **`dashboard.render_dashboard()`**: inlines the assets and the payload into a
+  single self-contained HTML file (`--html`, or served in memory).
+- **`server.serve_dashboard()`**: a loopback `http.server` that holds one page
+  in memory. With an `Editor` attached it also answers four JSON/image endpoints
+  under `/api/`; without one it serves the page and 404s everything else. There
+  is no static root and no directory listing either way.
+
+The boundary is one-directional like every other seam here: the design layer
+reads the model and never writes to it, so the UI can be redesigned without
+touching a single check.
+
 ### `cvflow.cli`: command-line interface
 The user-facing entry point (`cvflow inspect`). Parses arguments, wires
 load → analyze → report, and chooses the process exit code from the findings.
@@ -117,6 +159,8 @@ Kept thin; it owns no analysis logic of its own.
   CLI, and reporter pick it up automatically.
 - **New threshold** → add a field to `CheckConfig`.
 - **New output** → add a renderer in `cvflow.report`.
+- **New UI** → edit the assets in `cvflow.design`; add a field to the payload
+  only if the page needs data it doesn't already have.
 
 None of these require changes outside their own module.
 
@@ -131,4 +175,5 @@ None of these require changes outside their own module.
 4. **Stable interfaces at the seams.** The normalized model and the `Issue` type
    are the contracts that let each layer change independently.
 5. **Lean dependencies.** Only two runtime dependencies (`pyyaml`, `pillow`),
-   each added when a feature genuinely needed it.
+   each added when a feature genuinely needed it. The dashboard adds none: it is
+   standard-library rendering plus static assets.
