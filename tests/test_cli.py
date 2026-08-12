@@ -113,6 +113,41 @@ def test_inspect_missing_path(capsys: pytest.CaptureFixture[str]) -> None:
     assert "does not exist" in err
 
 
+def test_inspect_html_writes_dashboard(
+    clean_dataset: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    out = tmp_path / "reports" / "dashboard.html"
+    code = main(["inspect", str(clean_dataset), "--html", str(out)])
+    assert code == EXIT_OK
+
+    html = out.read_text(encoding="utf-8")
+    assert html.startswith("<!doctype html>")
+    assert "cvflow-data" in html
+    # The dashboard replaces the text report rather than printing alongside it.
+    out_text = capsys.readouterr().out
+    assert "CVFlow Dataset Health" not in out_text
+    assert str(out) in out_text
+
+
+def test_inspect_html_keeps_exit_code(
+    integrity_dataset: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    out = tmp_path / "dashboard.html"
+    assert main(["inspect", str(integrity_dataset), "--html", str(out)]) == EXIT_ISSUES_FOUND
+    capsys.readouterr()
+
+
+def test_serve_flags_parse() -> None:
+    parser = build_parser()
+    args = parser.parse_args(
+        ["inspect", ".", "--serve", "--port", "8123", "--host", "0.0.0.0", "--no-browser"]
+    )
+    assert args.serve is True
+    assert args.port == 8123
+    assert args.host == "0.0.0.0"
+    assert args.open_browser is False
+
+
 def test_parser_builds() -> None:
     parser = build_parser()
     args = parser.parse_args(["inspect", "."])
@@ -121,12 +156,39 @@ def test_parser_builds() -> None:
 
 
 def test_module_entry_point(clean_dataset: Path) -> None:
-    # `python -m cvflow inspect <path>` should behave like the console script.
+    # `python -m cvflow inspect <path>` should behave like the console script,
+    # including when stdout is a pipe on a non-UTF-8 console (Windows cp1252):
+    # the report's box-drawing rules must not blow up the process.
     result = subprocess.run(
         [sys.executable, "-m", "cvflow", "inspect", str(clean_dataset)],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=False,
     )
-    assert result.returncode == EXIT_OK
+    assert result.returncode == EXIT_OK, result.stderr
     assert "CVFlow Dataset Health" in result.stdout
+    assert "─" in result.stdout  # the rule survived the pipe
+
+
+def test_inspect_announces_the_wait(
+    clean_dataset: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A silent terminal during a minutes-long scan looks like a hang."""
+    main(["inspect", str(clean_dataset)])
+    captured = capsys.readouterr()
+
+    assert "1-5 minutes" in captured.err
+    assert "Analyzing" in captured.err
+    # It is progress, not output: piping the report must not pick it up.
+    assert "Analyzing" not in captured.out
+
+
+def test_inspect_note_is_honest_without_image_checks(
+    clean_dataset: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    main(["inspect", str(clean_dataset), "--no-images"])
+    captured = capsys.readouterr()
+
+    assert "quick" in captured.err
+    assert "1-5 minutes" not in captured.err

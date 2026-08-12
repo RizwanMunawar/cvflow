@@ -2,7 +2,7 @@
 
 <p align="center">
   <strong>A linter for computer-vision datasets.</strong><br>
-  Point it at a folder of images and labels, and it tells you what's broken,
+  Point it at a folder of images and labels. It tells you what's broken,
   duplicated, mislabeled, or suspicious, before it wastes a training run.
 </p>
 
@@ -26,54 +26,132 @@
   </a>
 </p>
 
-## The problem
+---
 
-Most model bugs aren't in the model; they're in the data. A handful of corrupt
-JPEGs, a few hundred boxes that spill off the edge of the frame, one class that's
-secretly 0.3% of your labels, or the same video frame sitting in both `train`
-and `val`. None of it throws an error. It just quietly drags your metrics around
-and you find out three experiments later.
+## Quickstart
 
-Finding this stuff by hand means scrolling through thousands of images. CVFlow
-does that scan for you and hands back a short, ranked list of what actually
-deserves your attention.
+Three commands. No config, no account, no setup.
+
+```bash
+pip install cvflow                     # 1. install
+cvflow inspect ./dataset               # 2. check a dataset  (prints a report)
+cvflow inspect ./dataset --serve       # 3. or open the dashboard in your browser
+```
+
+That's the whole tool. `./dataset` is any folder holding a YOLO or COCO dataset;
+CVFlow works out which one it is, and whether it holds boxes, polygons or
+oriented boxes.
+
+### Never used a terminal tool like this?
+
+<details>
+<summary><strong>Step-by-step, from nothing</strong></summary>
+
+1. **Check you have Python 3.9 or newer.** In a terminal (Command Prompt on
+   Windows, Terminal on macOS/Linux):
+
+   ```bash
+   python --version
+   ```
+
+   No Python? Install it from [python.org/downloads](https://www.python.org/downloads/).
+
+2. **Install CVFlow:**
+
+   ```bash
+   pip install cvflow
+   ```
+
+3. **Try it on a real dataset.** If you don't have one handy, the Ultralytics
+   `coco128` sample works well: download and unzip it, then point CVFlow at the
+   folder:
+
+   ```bash
+   cvflow inspect ./coco128 --serve
+   ```
+
+4. Your browser opens `http://localhost:8000` with the dashboard. Press
+   `Ctrl+C` in the terminal when you're finished.
+
+**`cvflow: command not found`?** Use `python -m cvflow` instead of `cvflow`.
+Same tool, works even when your `PATH` isn't set up:
+
+```bash
+python -m cvflow inspect ./dataset --serve
+```
+
+</details>
+
+---
+
+## What you get
+
+### The dashboard: `--serve`
+
+```bash
+cvflow inspect ./dataset --serve
+# coco128: 128 images, 929 annotations, 71 classes (YOLO object detection, no splits).
+# 98 findings: 0 errors, 49 warnings, 49 info.
+# Open http://localhost:8000 for the detail: every finding, its image, and the fix.
+```
+
+One page, four tabs, everything hover- and keyboard-readable, light and dark:
+
+| Tab | What it answers |
+|---|---|
+| **Overview** | How healthy is this dataset? What should I fix first, and how much accuracy is it worth? |
+| **Classes** | Which classes dominate? How long is the tail? |
+| **Geometry** | How big are the boxes, what shape, how many per image, and where in the frame do they sit? |
+| **Findings** | Every finding, filterable by severity, check, or free text. |
+
+> **No extra install.** The charts are Chart.js and the type is Archivo, the
+> Ultralytics brand face, both vendored inside the Python package and inlined
+> into the page. No Node, no npm, no CDN: `pip install cvflow` is the whole
+> setup and the page works offline.
+
+Handy bits: hover any card for a plain-English explanation of what it shows, use
+**⤢** to blow it up full screen or **↓** to save it as PNG or JSON, collapse the
+sidebar with the rail button, click any check or image to filter the findings to
+it, and use the **Accuracy headroom** panel to estimate what fixing each problem
+is worth. Tick items off as you go and the number updates.
+
+Findings render as cards: severity, the headline, why it was flagged, a thumbnail
+of the image, and the suggested next step. Filter by severity, check, split or
+free text, and sort by any of them.
+
+### Fix boxes without leaving the page
+
+Click any finding that points at an image (or any bar in *Images with the most
+findings*) and the photo opens with its boxes drawn on top. **The box the finding
+is about is drawn in red**; every other class keeps its own colour. Down the right
+side: what was flagged, why, the suggested next step, and one-click fixes
+(*Clamp into frame*, *Delete this box*, *Reassign class*, *Add a box*). You can
+also:
+
+- drag a box to move it, drag its corner to resize,
+- drag on empty canvas to draw a new one,
+- change the class of the selected box, or delete it,
+- **Save labels** to write the corrections straight back to the label file.
+
+Editing needs `--serve` (the static `--html` file has no backend) and writes
+**YOLO detection** labels only: one small text file per image, so a change is
+contained and easy to review in git. COCO, segmentation and OBB datasets open
+read-only, because rewriting a polygon as a box would silently throw the mask
+away, and the panel says so. Everything is confined to your dataset folder: the
+server serves that one page plus images from inside the dataset root, nothing else.
+
+Prefer a file you can archive or attach to a PR? `--html` writes the same
+self-contained page to disk, no server involved:
+
+```bash
+cvflow inspect ./dataset --html report.html
+```
+
+### The terminal report: the default
 
 ```bash
 cvflow inspect ./dataset
 ```
-
-## What it checks
-
-Point CVFlow at a dataset and it answers the questions you'd otherwise check by
-hand, one script at a time:
-
-- **Is anything broken?** Corrupt/unreadable images, missing or invalid
-  annotation files, broken paths, bad image dimensions, duplicate filenames.
-- **Are the annotations sane?** Boxes outside the image, negative or
-  zero-area boxes, absurdly tiny or full-frame boxes, duplicate overlapping
-  boxes, class IDs that don't exist.
-- **Is the distribution weird?** Class balance, objects per image, box sizes,
-  aspect ratios, and images that are statistical outliers.
-- **Do I have duplicates?** Exact copies (by hash) and near-duplicates (by
-  perceptual hash, with a similarity score).
-- **Are my splits leaking?** The same (or nearly the same) image showing up in
-  more than one split. This one bites hardest on datasets cut from video.
-
-Every finding comes with a severity, a plain-English reason, where it is, the
-evidence behind it, and a suggested next step. CVFlow won't tell you your dataset
-is *wrong*; it shows you what looks off and lets you make the call.
-
-## Quick start
-
-```bash
-# from a source checkout
-pip install -e .
-
-cvflow inspect ./dataset
-```
-
-That's it. CVFlow figures out whether the folder is YOLO or COCO, loads it, runs
-every check, and prints a report:
 
 ```text
 CVFlow Dataset Health
@@ -99,21 +177,49 @@ Most Important Problems
 5. [WARNING] Class 'helmet' represents only 0.4% of annotations.
 ```
 
-The exit code is `0` when nothing's wrong, and non-zero when there are errors,
-so you can drop `cvflow inspect` straight into CI. (Add `--strict` to fail on
-warnings too.)
+The exit code is `0` when nothing's wrong and non-zero when there are errors, so
+`cvflow inspect` drops straight into CI. Add `--strict` to fail on warnings too.
+
+---
+
+## What it checks
+
+Point CVFlow at a dataset and it answers the questions you'd otherwise check by
+hand, one script at a time:
+
+CVFlow reads **object detection**, **instance segmentation** and **oriented box
+(OBB)** datasets. Polygons and oriented boxes are audited through their
+axis-aligned extent, and the task is named in the sidebar and the terminal, so
+you always know how your labels were read.
+
+- **Is anything broken?** Corrupt/unreadable images, missing or invalid
+  annotation files, broken paths, bad image dimensions, duplicate filenames.
+- **Are the annotations sane?** Boxes outside the image, negative or zero-area
+  boxes, absurdly tiny or full-frame boxes, duplicate overlapping boxes, class
+  IDs that don't exist.
+- **Is the distribution weird?** Class balance, objects per image, box sizes,
+  aspect ratios, and images that are statistical outliers.
+- **Do I have duplicates?** Exact copies (by hash) and near-duplicates (by
+  perceptual hash, with a similarity score).
+- **Are my splits leaking?** The same (or nearly the same) image in more than
+  one split. This one bites hardest on datasets cut from video.
+
+Every finding carries a severity, a plain-English reason, where it is, the
+evidence behind it, and a suggested next step. CVFlow won't tell you your dataset
+is *wrong*; it shows you what looks off and lets you make the call.
+
+---
 
 ## How your dataset should be laid out
 
 CVFlow reads the two most common detection formats. The closer your folder is to
-one of the layouts below, the more it can audit. In particular, it needs to
-find the **actual image files** on disk to check for corrupt images, duplicates,
-and split leakage.
+one of the layouts below, the more it can audit. In particular it needs to find
+the **actual image files** on disk to check for corrupt images, duplicates, and
+split leakage.
 
 ### YOLO
 
-The recommended layout is an Ultralytics-style `data.yaml` next to mirrored
-`images/` and `labels/` folders:
+An Ultralytics-style `data.yaml` next to mirrored `images/` and `labels/` folders:
 
 ```text
 dataset/
@@ -145,8 +251,8 @@ names:                  # a list works too: [person, helmet]
   1: helmet
 ```
 
-A label file holds **one box per line**, in normalized YOLO format: class id
-followed by the box center and size, each as a fraction of the image (0–1):
+A label file holds **one box per line** in normalized YOLO format: class id, then
+box center and size, each as a fraction of the image (0–1):
 
 ```text
 # class_id  cx     cy     w      h
@@ -159,17 +265,17 @@ A few things worth knowing:
 - CVFlow finds a label by taking the image path and swapping `images/` →
   `labels/` and the extension → `.txt`. Keep that mirroring intact.
 - An image with **no label file, or an empty one, is treated as a background
-  image** (no objects); that's a WARNING you can sanity-check, not an error.
+  image** (no objects); that's a WARNING to sanity-check, not an error.
 - Supported image extensions: `.jpg .jpeg .png .bmp .webp .tif .tiff`.
 
 **No `data.yaml`?** CVFlow falls back to a plain `images/` + `labels/` pair. It
-picks up `train/`, `val/`, `test/` subfolders if they're there, otherwise treats
-everything as one split. Class names are read from a `classes.txt` (one name per
-line) if present, and inferred from the label files otherwise.
+picks up `train/`, `val/`, `test/` subfolders if present, otherwise treats
+everything as one split. Class names come from `classes.txt` (one name per line)
+if it exists, and are inferred from the label files otherwise.
 
 ### COCO
 
-Put your annotation JSON(s) under `annotations/` and the images under `images/`:
+Annotation JSON(s) under `annotations/`, images under `images/`:
 
 ```text
 dataset/
@@ -196,21 +302,23 @@ Each JSON is standard COCO: `images`, `annotations`, and `categories`:
 Notes:
 
 - COCO `bbox` is **absolute pixels** `[x, y, width, height]` with `(x, y)` at the
-  top-left. CVFlow normalizes it internally using each image's `width`/`height`,
-  so a YOLO box and a COCO box end up meaning the same thing.
+  top-left. CVFlow normalizes it using each image's `width`/`height`, so a YOLO
+  box and a COCO box end up meaning the same thing.
 - The **split** is inferred from the JSON filename: anything containing `train`,
   `val`, or `test`. A single JSON with no such hint loads as one unnamed split.
 - To run the image-level checks (corrupt / duplicate / leakage), CVFlow needs the
   pixels. It looks for each `file_name` under the dataset root, then `images/`,
-  then `images/<split>/` and `<split>/`. If it can't find them, it still audits
-  structure, annotations, and statistics, and tells you image checks were
-  skipped rather than inventing false positives.
+  then `images/<split>/` and `<split>/`. If it can't find them it still audits
+  structure, annotations, and statistics, and tells you image checks were skipped
+  rather than inventing false positives.
 
 > **Rule of thumb:** structure and annotation checks run from the labels alone;
 > corrupt-image, duplicate, and leakage checks need the image files reachable
 > from the dataset root. Point CVFlow at the folder that contains both.
 
-## Options
+---
+
+## Command reference
 
 ```text
 cvflow inspect <path> [options]
@@ -220,20 +328,50 @@ cvflow inspect <path> [options]
                              also skips corrupt/duplicate/leakage detection).
       --no-stats             Hide the dataset-statistics section.
       --strict               Exit non-zero on warnings, not just errors.
+
+  dashboard:
+      --serve                Open the findings in a browser dashboard instead
+                             of printing a text report.
+      --port N               Port for --serve (default: first free from 8000).
+      --host HOST            Interface for --serve (default: 127.0.0.1).
+      --no-browser           With --serve, print the URL instead of opening it.
+      --html FILE            Write the dashboard to a self-contained HTML file.
+
+  cvflow --version           Print the version.
+  cvflow inspect --help      Show this list in your terminal.
 ```
 
-Exit codes: `0` clean, `1` problems found (errors, or warnings under `--strict`),
-`2` bad usage, `3` path not found, `4` the dataset couldn't be loaded.
+Exit codes: `0` clean · `1` problems found (errors, or warnings under `--strict`)
+· `2` bad usage · `3` path not found · `4` the dataset couldn't be loaded.
+
+### Common recipes
+
+```bash
+# Fast structural check on a huge dataset (skips reading image bytes)
+cvflow inspect ./dataset --no-images
+
+# Gate a CI job on data quality
+cvflow inspect ./dataset --strict
+
+# Force the format when auto-detection can't tell
+cvflow inspect ./dataset --format coco
+
+# Share the dashboard with a teammate on your network
+cvflow inspect ./dataset --serve --host 0.0.0.0 --port 9000
+```
+
+---
 
 ## Design philosophy
 
 > Don't tell developers their dataset is wrong. Show them what looks suspicious,
 > explain why, and let them decide.
 
-That principle is baked into the tool. Severity is used honestly:
-`ERROR` means something is objectively broken, `WARNING` means "worth a look",
-and `INFO` is just an observation. Statistical oddities and duplicates are never
-hard errors; they're candidates for review, phrased that way on purpose.
+That principle is baked into the tool. Severity is used honestly: `ERROR` means
+something is objectively broken, `WARNING` means "worth a look", and `INFO` is an
+observation. Statistical oddities and duplicates are never hard errors; they're
+candidates for review, phrased that way on purpose. The dashboard's accuracy
+estimate is labeled an estimate, with its formula on screen.
 
 ## Roadmap
 
@@ -244,26 +382,29 @@ hard errors; they're candidates for review, phrased that way on purpose.
 - ✅ **Dataset statistics**: distributions & outlier detection
 - ✅ **Duplicate detection**: exact + perceptual hashing
 - ✅ **Split-leakage detection**: cross-split similarity
+- ✅ **Dashboard**: one browser page for the whole report
 - ⬜ **Visualization**: eyeball the flagged samples
 
 ## How it fits together
 
 ```text
-Dataset ─▶ Loaders ─▶ Normalized model ─▶ Analysis engine ─▶ Issues ─▶ Report
-                        (cvflow.model)      ├─ integrity
-                                            ├─ annotations
+Dataset ─▶ Loaders ─▶ Normalized model ─▶ Analysis engine ─▶ Issues ─┬─▶ Report  (text)
+                        (cvflow.model)      ├─ integrity             │
+                                            ├─ annotations           └─▶ Design (dashboard)
                                             ├─ statistics
                                             ├─ duplicates
                                             └─ leakage
 ```
 
-Everything downstream speaks in one normalized model and one `Issue` type, so a
-new format, rule, or output slots in without touching the rest. The details live
-in [`docs/architecture.md`](docs/architecture.md).
+Everything downstream speaks one normalized model and one `Issue` type, so a new
+format, rule, or output slots in without touching the rest. Details in
+[`docs/architecture.md`](docs/architecture.md).
 
 ## Development
 
 ```bash
+git clone https://github.com/RizwanMunawar/cvflow
+cd cvflow
 pip install -e ".[dev]"
 
 ruff check .          # lint

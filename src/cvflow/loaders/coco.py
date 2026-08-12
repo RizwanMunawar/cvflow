@@ -45,17 +45,20 @@ class CocoLoader(DatasetLoader):
         root = path if path.is_dir() else path.parent
         class_names: dict[int, str] = {}
         images: list[ImageItem] = []
+        tasks: set[str] = set()
 
         for json_path in json_files:
             split = _infer_split(json_path)
-            split_images, split_classes = _load_coco_json(json_path, split)
+            split_images, split_classes, split_tasks = _load_coco_json(json_path, split)
             images.extend(split_images)
             class_names.update(split_classes)
+            tasks |= split_tasks
 
         return Dataset(
             name=root.name,
             root=str(root.resolve()),
             format=self.format,
+            task="segment" if "segment" in tasks else "detect",
             images=images,
             class_names=class_names,
         )
@@ -98,7 +101,9 @@ def _infer_split(json_path: Path) -> str | None:
     return None
 
 
-def _load_coco_json(json_path: Path, split: str | None) -> tuple[list[ImageItem], dict[int, str]]:
+def _load_coco_json(
+    json_path: Path, split: str | None
+) -> tuple[list[ImageItem], dict[int, str], set[str]]:
     with json_path.open("r", encoding="utf-8") as fh:
         data: dict[str, Any] = json.load(fh)
 
@@ -106,12 +111,17 @@ def _load_coco_json(json_path: Path, split: str | None) -> tuple[list[ImageItem]
         int(c["id"]): str(c.get("name", c["id"])) for c in data.get("categories", []) if "id" in c
     }
 
-    # Group annotations by image id.
+    # Group annotations by image id, noting whether they carry masks: a COCO
+    # file with segmentations is an instance-segmentation dataset whose boxes
+    # happen to be derivable, which is worth saying out loud.
     anns_by_image: dict[int, list[dict[str, Any]]] = {}
+    tasks: set[str] = set()
     for ann in data.get("annotations", []):
         image_id = ann.get("image_id")
         if image_id is None or "bbox" not in ann:
             continue
+        if ann.get("segmentation"):
+            tasks.add("segment")
         anns_by_image.setdefault(int(image_id), []).append(ann)
 
     images: list[ImageItem] = []
@@ -132,7 +142,7 @@ def _load_coco_json(json_path: Path, split: str | None) -> tuple[list[ImageItem]
                 image_id=image_id,
             )
         )
-    return images, class_names
+    return images, class_names, tasks
 
 
 def _boxes_for_image(

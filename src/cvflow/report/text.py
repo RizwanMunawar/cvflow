@@ -84,7 +84,7 @@ def _statistics(dataset: Dataset, stats: DatasetStatistics, top_classes: int = 1
 
 
 def _overview(dataset: Dataset) -> list[str]:
-    splits = ", ".join(dataset.splits) if dataset.splits else "—"
+    splits = ", ".join(dataset.splits) if dataset.splits else "none"
     return [
         "CVFlow Dataset Health",
         _RULE,

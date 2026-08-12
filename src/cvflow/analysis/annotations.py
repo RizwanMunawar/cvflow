@@ -39,6 +39,17 @@ def _iou(a: BoundingBox, b: BoundingBox) -> float:
     return inter / union if union > 0 else 0.0
 
 
+def _indexed_boxes(dataset: Dataset) -> Iterable[tuple[ImageItem, int, BoundingBox]]:
+    """Every box with its position in the image's annotation list.
+
+    The index is what lets a finding point at one box: the report prints it,
+    and the dashboard's editor selects and highlights exactly that box.
+    """
+    for item in dataset.images:
+        for index, box in enumerate(item.boxes):
+            yield item, index, box
+
+
 class OutOfBoundsBoxCheck(Check):
     """Boxes whose coordinates fall outside the normalized image frame."""
 
@@ -49,7 +60,7 @@ class OutOfBoundsBoxCheck(Check):
 
     def run(self, dataset: Dataset) -> Iterable[Issue]:
         lo, hi = -self._eps, 1.0 + self._eps
-        for item, box in dataset.iter_boxes():
+        for item, index, box in _indexed_boxes(dataset):
             coords = (box.x_min, box.y_min, box.x_max, box.y_max)
             if all(lo <= c <= hi for c in coords):
                 continue
@@ -62,7 +73,7 @@ class OutOfBoundsBoxCheck(Check):
                 severity=Severity.ERROR,
                 message="Bounding box extends outside the image boundaries.",
                 why=why,
-                location=Location(path=item.path, split=item.split),
+                location=Location(path=item.path, split=item.split, annotation_index=index),
                 evidence={"box": _fmt_box(box), "class_id": box.class_id},
                 suggestion="Clip the box to the image or fix the annotation.",
             )
@@ -74,7 +85,7 @@ class DegenerateBoxCheck(Check):
     code = "annotation"
 
     def run(self, dataset: Dataset) -> Iterable[Issue]:
-        for item, box in dataset.iter_boxes():
+        for item, index, box in _indexed_boxes(dataset):
             if box.width > 0 and box.height > 0:
                 continue
             yield Issue(
@@ -82,7 +93,7 @@ class DegenerateBoxCheck(Check):
                 severity=Severity.ERROR,
                 message="Bounding box has zero or negative width/height.",
                 why="A valid box must have positive width and height.",
-                location=Location(path=item.path, split=item.split),
+                location=Location(path=item.path, split=item.split, annotation_index=index),
                 evidence={
                     "box": _fmt_box(box),
                     "width": round(box.width, 4),
@@ -101,7 +112,7 @@ class TinyBoxCheck(Check):
         self._min_side = (config or CheckConfig()).tiny_box_side
 
     def run(self, dataset: Dataset) -> Iterable[Issue]:
-        for item, box in dataset.iter_boxes():
+        for item, index, box in _indexed_boxes(dataset):
             if box.width <= 0 or box.height <= 0:
                 continue  # degenerate boxes are handled elsewhere
             if box.width >= self._min_side and box.height >= self._min_side:
@@ -114,7 +125,7 @@ class TinyBoxCheck(Check):
                     f"A side is below {self._min_side:.0%} of the image; such "
                     "boxes are often labeling noise or mistakes."
                 ),
-                location=Location(path=item.path, split=item.split),
+                location=Location(path=item.path, split=item.split, annotation_index=index),
                 evidence={
                     "box": _fmt_box(box),
                     "width": round(box.width, 4),
@@ -133,7 +144,7 @@ class HugeBoxCheck(Check):
         self._max_area = (config or CheckConfig()).huge_box_area
 
     def run(self, dataset: Dataset) -> Iterable[Issue]:
-        for item, box in dataset.iter_boxes():
+        for item, index, box in _indexed_boxes(dataset):
             if box.area <= self._max_area:
                 continue
             yield Issue(
@@ -144,7 +155,7 @@ class HugeBoxCheck(Check):
                     f"The box covers {box.area:.0%} of the image; near-full-frame "
                     "boxes are sometimes accidental or overly coarse labels."
                 ),
-                location=Location(path=item.path, split=item.split),
+                location=Location(path=item.path, split=item.split, annotation_index=index),
                 evidence={"box": _fmt_box(box), "area": round(box.area, 4)},
                 suggestion="Confirm the object really fills the frame.",
             )

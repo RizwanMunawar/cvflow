@@ -56,7 +56,6 @@ tests/        pytest suite mirroring the package structure
 
 - Keep PRs small and focused — one logical change per PR.
 - Add or update tests for behavior changes.
-- Update `CHANGELOG.md` under `[Unreleased]`.
 - Reference the related Linear issue / GitHub issue where applicable.
 
 ## Reporting issues

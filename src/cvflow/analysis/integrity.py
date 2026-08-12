@@ -37,7 +37,9 @@ class DuplicateFilenameCheck(Check):
                     "The same file name in multiple places often means images were "
                     "merged carelessly and can shadow one another in tooling."
                 ),
-                location=Location(path=name),
+                # No single location: the finding is about several files, and
+                # putting a bare file name here made it look like a path that
+                # could be opened. The real paths are the evidence.
                 evidence={
                     "count": len(items),
                     "paths": [it.path for it in items][:10],
@@ -73,11 +75,21 @@ class InvalidClassIdCheck(Check):
             )
 
 
+#: Empty images are listed individually up to here; the rest are summarized.
+_EMPTY_IMAGE_LIMIT = 50
+
+
 class EmptyAnnotationCheck(Check):
     """Reports images that carry no annotations.
 
-    Not necessarily an error — background/negative images are legitimate — so
-    this is a single aggregated WARNING for the developer to sanity-check.
+    Not necessarily an error, since background/negative images are legitimate,
+    so these are WARNINGs for the developer to sanity-check.
+
+    One finding per image rather than a single aggregate: each one names a file
+    you can open and look at, which is the only way to tell a deliberate
+    background frame from one somebody forgot to label. A dataset built mostly
+    of background images would flood the list, so past
+    :data:`_EMPTY_IMAGE_LIMIT` the tail is summarized in one final finding.
     """
 
     code = "integrity"
@@ -86,20 +98,35 @@ class EmptyAnnotationCheck(Check):
         empty = [item for item in dataset.images if item.is_empty]
         if not empty:
             return
-        yield Issue(
-            code="empty-image",
-            severity=Severity.WARNING,
-            message=f"{len(empty)} image(s) have no annotations.",
-            why=(
-                "Images without labels may be intentional background samples, or "
-                "they may be unlabeled data that was meant to be annotated."
-            ),
-            evidence={
-                "count": len(empty),
-                "examples": [item.path for item in empty][:10],
-            },
-            suggestion="Confirm these are intended as background images.",
+
+        why = (
+            "Images without labels may be intentional background samples, or "
+            "they may be unlabeled data that was meant to be annotated."
         )
+        for item in empty[:_EMPTY_IMAGE_LIMIT]:
+            yield Issue(
+                code="empty-image",
+                severity=Severity.WARNING,
+                message="Image has no annotations.",
+                why=why,
+                location=Location(path=item.path, split=item.split),
+                evidence={"boxes": 0},
+                suggestion="Open it and confirm it is meant to be a background image.",
+            )
+
+        remaining = empty[_EMPTY_IMAGE_LIMIT:]
+        if remaining:
+            yield Issue(
+                code="empty-image",
+                severity=Severity.WARNING,
+                message=f"{len(remaining)} further image(s) have no annotations.",
+                why=why,
+                evidence={
+                    "count": len(remaining),
+                    "examples": [item.path for item in remaining][:10],
+                },
+                suggestion="Confirm these are intended as background images.",
+            )
 
 
 class InvalidImageDimensionCheck(Check):

@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "cvflow"
 version = "0.0.2"
-description = "ESLint / DevTools for computer-vision datasets — inspect datasets for broken, duplicated, inconsistent, or suspicious data."
+description = "ESLint / DevTools for computer-vision datasets: inspect datasets for broken, duplicated, inconsistent, or suspicious data."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
@@ -55,7 +55,7 @@ dev = [
 Homepage = "https://github.com/RizwanMunawar/cvflow"
 Repository = "https://github.com/RizwanMunawar/cvflow"
 Issues = "https://github.com/RizwanMunawar/cvflow/issues"
-Changelog = "https://github.com/RizwanMunawar/cvflow/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/RizwanMunawar/cvflow/releases"
 
 [project.scripts]
 cvflow = "cvflow.cli.main:main"
