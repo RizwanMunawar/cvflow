@@ -26,6 +26,8 @@
   </a>
 </p>
 
+https://github.com/user-attachments/assets/8bd483fe-c18a-4cfb-b209-8ba409327506
+
 ## Quickstart
 
 Three commands. No config, no account, no setup.
