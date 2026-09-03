@@ -698,7 +698,12 @@ the fields they care about, so adding one doesn't ripple outward.
 ## In CI
 
 Because the exit code is meaningful, `cvflow inspect` drops straight into a
-pipeline as a data-quality gate:
+pipeline as a data-quality gate.
+
+<details>
+<summary><strong>Show the workflow steps</strong></summary>
+
+<br>
 
 ```yaml
 - name: Check dataset quality
@@ -725,11 +730,18 @@ A few things make CI runs pleasanter:
     path: report.html
 ```
 
+</details>
+
 ## From Python
 
 The CLI is thin wiring over a small public API, so you can run the same pipeline
 yourself — to filter findings, feed them into another tool, or tune a threshold
-the CLI doesn't expose:
+the CLI doesn't expose.
+
+<details>
+<summary><strong>Show the Python API</strong></summary>
+
+<br>
 
 ```python
 from cvflow.analysis import AnalysisEngine, CheckConfig, compute_statistics, default_checks
@@ -764,6 +776,8 @@ from cvflow.analysis import AnalysisEngine, CheckConfig, annotation_checks, inte
 config = CheckConfig()
 engine = AnalysisEngine([*integrity_checks(config), *annotation_checks(config)])
 ```
+
+</details>
 
 ## Troubleshooting
 
