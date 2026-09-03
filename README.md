@@ -124,7 +124,7 @@ cvflow --version
 ```
 
 If your shell reports `cvflow: command not found`, the console script isn't on
-your `PATH`. Use the module form instead — it's the same program:
+your `PATH`. Use the module form instead; it's the same program:
 
 ```bash
 python -m cvflow inspect ./dataset
@@ -142,7 +142,7 @@ pip install -e ".[dev]"
 ## Your first run
 
 Run `inspect` with no path and CVFlow downloads Ultralytics' `coco128` sample
-(about 7 MB), unpacks it into a cache directory, and inspects that — so you can
+(about 7 MB), unpacks it into a cache directory, and inspects that, so you can
 see exactly what the tool does before arranging any data of your own.
 
 ```bash
@@ -150,7 +150,7 @@ cvflow inspect
 ```
 
 The sample is fetched once and reused on every later run. Set `CVFLOW_CACHE` to
-choose where it lands; otherwise CVFlow uses the platform cache home —
+choose where it lands; otherwise CVFlow uses the platform cache home:
 `%LOCALAPPDATA%\cvflow\cache` on Windows, and `$XDG_CACHE_HOME/cvflow` (falling
 back to `~/.cache/cvflow`) everywhere else.
 
@@ -341,7 +341,7 @@ See [Exit codes](#exit-codes).
 ## The dashboard
 
 The terminal report tells you what's wrong. The dashboard shows you, on one
-page, with the images attached — and lets you fix boxes without leaving it.
+page, with the images attached, and lets you fix boxes without leaving it.
 
 ```bash
 cvflow inspect ./dataset --serve
@@ -378,7 +378,7 @@ nothing.
 |---|---|
 | `--serve` | Start the dashboard instead of printing the text report. |
 | `--port N` | Bind this exact port. Omitted, CVFlow scans upward from 8000 for the first free one. |
-| `--host HOST` | Interface to bind. Defaults to `127.0.0.1` — loopback only. |
+| `--host HOST` | Interface to bind. Defaults to `127.0.0.1` (loopback only). |
 | `--no-browser` | Print the URL instead of opening a browser. Use it over SSH, in a container, or in a tmux pane. |
 | `--html FILE` | Write the same page to a self-contained file. Can be combined with `--serve`. |
 
@@ -397,7 +397,7 @@ The server holds one page in memory. There is no static root and no directory
 listing: with the editor attached it answers the page plus four `/api/`
 endpoints; without one it serves the page and 404s everything else. Binding
 `0.0.0.0` exposes both the page and, with it, read and write access to the labels
-in your dataset folder to anyone who can reach that port — do that on a trusted
+in your dataset folder to anyone who can reach that port. Do that on a trusted
 network only.
 
 ### Getting around
@@ -406,8 +406,8 @@ network only.
 - **⤢** blows a chart up full screen; **↓** saves it as PNG or as the JSON
   behind it.
 - **The rail button** collapses the sidebar.
-- **Click any check or any image** — a bar in *Findings by type*, or one in
-  *Images with the most findings* — to filter the findings view to it.
+- **Click any check or any image** (a bar in *Findings by type*, or one in
+  *Images with the most findings*) to filter the findings view to it.
 - **Findings** render as cards: severity, the headline, why it was flagged, a
   thumbnail of the image, and the suggested next step. Filter by severity,
   check, split or free text, and sort by any of them.
@@ -417,7 +417,7 @@ network only.
 **Accuracy headroom** (on the Overview tab) is a rough estimate of the accuracy
 you could recover by fixing each class of problem, with its formula shown on
 screen. Tick items off as you fix them and the remaining headroom updates. It's
-labeled an estimate because it is one — treat it as a way to rank what to fix
+labeled an estimate because it is one. Treat it as a way to rank what to fix
 first, not as a number to report.
 
 ### Fixing boxes without leaving the page
@@ -456,8 +456,8 @@ A save writes one label file: one line per box, `class_id cx cy w h`, normalized
 and mirrored from the image path. Images that had no label file get one created
 at that mirrored path.
 
-Every path the editor touches — reading an image, resolving a label file, writing
-one — is resolved and confined to the dataset root. The editor writes in place and
+Every path the editor touches (reading an image, resolving a label file, writing
+one) is resolved and confined to the dataset root. The editor writes in place and
 keeps no backup, which is the point: your labels live in git, one file per image,
 so a bad edit is a `git diff` away from being seen and a `git checkout` away from
 being undone. If your dataset isn't under version control, make a copy before an
@@ -474,7 +474,7 @@ cvflow inspect ./dataset --html report.html
 
 No server, no external requests, nothing to install to read it. It's the right
 output for attaching to a PR, archiving with a dataset version, or uploading as
-a CI artifact. The one thing the file can't do is edit — that needs the backend
+a CI artifact. The one thing the file can't do is edit: that needs the backend
 `--serve` provides, so the annotation editor opens read-only.
 
 ## Command reference
@@ -520,9 +520,9 @@ Notes on individual options:
 
 | Code | Meaning |
 |---|---|
-| `0` | Clean — no errors (and no warnings under `--strict`). |
+| `0` | Clean: no errors (and no warnings under `--strict`). |
 | `1` | Problems found: any `ERROR`, or any `WARNING` under `--strict`. |
-| `2` | Bad usage — no subcommand given. |
+| `2` | Bad usage: no subcommand given. |
 | `3` | The path does not exist. |
 | `4` | The dataset couldn't be loaded (unknown format, malformed, or the sample download failed). |
 
@@ -598,19 +598,19 @@ inconsistent.
 | `invalid-image-dimension` | ERROR | The recorded width or height is zero or negative. |
 | `invalid-annotation-file` | ERROR | A YOLO label file has malformed lines (not `class_id cx cy w h` with numeric values). |
 | `invalid-class-id` | ERROR / WARNING | A box uses a class id that isn't in the class map. `ERROR` when the id is negative, `WARNING` otherwise. Skipped entirely when the dataset defines no class names. |
-| `duplicate-filename` | WARNING | The same image filename appears more than once — a common sign of a merge that overwrote samples. |
+| `duplicate-filename` | WARNING | The same image filename appears more than once, a common sign of a merge that overwrote samples. |
 | `empty-image` | WARNING | An image has no annotations. Legitimate for background samples, so it's a prompt to confirm, not a failure. One finding per image up to a limit, then the tail is summarized in one further finding. |
 | `images-not-found` | INFO | No image file could be located under the dataset root, so every pixel-reading check was skipped. Reported once, instead of flooding the report with false `broken-image-path` findings. |
 
 ### Annotations
 
-Box geometry, on every task — polygons and oriented boxes are audited through
+Box geometry, on every task. Polygons and oriented boxes are audited through
 their axis-aligned extent.
 
 | Code | Severity | Triggered when | Threshold |
 |---|---|---|---|
 | `box-out-of-bounds` | ERROR | A normalized coordinate falls outside `0–1`. | `out_of_bounds_eps` (`1e-3`) tolerance before it counts |
-| `degenerate-box` | ERROR | Width or height is zero or negative. | — |
+| `degenerate-box` | ERROR | Width or height is zero or negative. | n/a |
 | `tiny-box` | WARNING | A side is below 1% of the image. Degenerate boxes are excluded; they're reported by their own check. | `tiny_box_side` (`0.01`) |
 | `huge-box` | WARNING | The box covers more than 90% of the frame. | `huge_box_area` (`0.9`) |
 | `duplicate-annotation` | WARNING | Two same-class boxes in one image overlap with IoU at or above the threshold. | `duplicate_iou` (`0.95`) |
@@ -624,9 +624,9 @@ matches, so a detection dataset never sees them.
 
 | Code | Severity | Triggered when | Threshold |
 |---|---|---|---|
-| `sparse-polygon` | ERROR | A polygon has fewer than three points, so it can't enclose an area. | — |
-| `empty-mask` | ERROR | The polygon encloses zero area. | — |
-| `rectangular-mask` | WARNING | The mask fills essentially all of its own bounding box — it's a rectangle wearing a polygon's clothes. | `rectangular_mask_fill` (`0.98`) |
+| `sparse-polygon` | ERROR | A polygon has fewer than three points, so it can't enclose an area. | n/a |
+| `empty-mask` | ERROR | The polygon encloses zero area. | n/a |
+| `rectangular-mask` | WARNING | The mask fills essentially all of its own bounding box: it's a rectangle wearing a polygon's clothes. | `rectangular_mask_fill` (`0.98`) |
 | `sliver-mask` | WARNING | The mask fills very little of its own extent, which usually means a broken or collapsed contour. | `sliver_mask_fill` (`0.05`) |
 
 **Oriented boxes (OBB) only:**
@@ -634,7 +634,7 @@ matches, so a detection dataset never sees them.
 | Code | Severity | Triggered when | Threshold |
 |---|---|---|---|
 | `non-rectangular-obb` | WARNING | A corner deviates from square by more than the tolerance, so the four points aren't a rectangle. | `obb_corner_tolerance` (`5.0` degrees) |
-| `unrotated-obb` | INFO | *Every* oriented box in the dataset is axis-aligned — the dataset is labeled as OBB but carries no rotation, so it may have been exported as plain boxes. Reported once for the dataset. | `obb_flat_tolerance` (`1.0` degrees) |
+| `unrotated-obb` | INFO | *Every* oriented box in the dataset is axis-aligned. The dataset is labeled as OBB but carries no rotation, so it may have been exported as plain boxes. Reported once for the dataset. | `obb_flat_tolerance` (`1.0` degrees) |
 
 ### Statistics
 
@@ -643,7 +643,7 @@ which is why none of them is an `ERROR`.
 
 | Code | Severity | Triggered when | Threshold |
 |---|---|---|---|
-| `objects-per-image-outlier` | WARNING | An image holds far more objects than the dataset average — above `mean + sigma × std`, and above an absolute floor so small datasets don't produce noise. | `objects_outlier_sigma` (`3.0`), `objects_outlier_floor` (`10`) |
+| `objects-per-image-outlier` | WARNING | An image holds far more objects than the dataset average: above `mean + sigma × std`, and above an absolute floor so small datasets don't produce noise. | `objects_outlier_sigma` (`3.0`), `objects_outlier_floor` (`10`) |
 | `rare-class` | INFO | A class accounts for less than 1% of all annotations. | `rare_class_fraction` (`0.01`) |
 | `class-imbalance` | INFO | The most-common class outnumbers the least-common by more than 100×. Reported once for the dataset. | `class_imbalance_ratio` (`100.0`) |
 
@@ -658,7 +658,7 @@ Redundant samples. Both checks hash the image files, so both **need pixels**.
 
 | Code | Severity | Triggered when | Threshold |
 |---|---|---|---|
-| `exact-duplicate` | WARNING | Two or more images share an identical SHA-256 — byte-for-byte copies. One finding per group, listing up to ten paths. | — |
+| `exact-duplicate` | WARNING | Two or more images share an identical SHA-256, so they are byte-for-byte copies. One finding per group, listing up to ten paths. | n/a |
 | `near-duplicate` | WARNING | Two images' perceptual hashes (64-bit dHash) differ by at most 5 bits. A distance of 0 is skipped, since `exact-duplicate` already covers it. Reporting stops after 100 pairs so a heavily duplicated dataset can't flood the report. | `near_duplicate_max_hamming` (`5`), `max_reported_duplicate_pairs` (`100`) |
 
 Near-duplicate detection is a pairwise comparison, which is the slow part of a
@@ -668,7 +668,7 @@ run on a large dataset. `--no-images` skips it.
 
 | Code | Severity | Triggered when | Threshold |
 |---|---|---|---|
-| `split-leakage` | WARNING | Visually near-identical images appear in two different splits — their perceptual hashes differ by at most 5 bits. One finding per pair of splits, counting every match and naming the closest one. **Needs pixels.** | `leakage_max_hamming` (`5`) |
+| `split-leakage` | WARNING | Visually near-identical images appear in two different splits: their perceptual hashes differ by at most 5 bits. One finding per pair of splits, counting every match and naming the closest one. **Needs pixels.** | `leakage_max_hamming` (`5`) |
 
 This check only runs when the dataset has at least two splits. It's the one that
 bites hardest on datasets cut from video, where consecutive frames end up on both
@@ -717,7 +717,7 @@ A few things make CI runs pleasanter:
 - Use `--no-images` when the images aren't checked out, or when the run has to
   stay under a couple of minutes. You lose corrupt/duplicate/leakage detection.
 - Use `--html report.html` and upload the file as a build artifact. It's
-  self-contained — one HTML file, no server, no external requests — so it
+  self-contained (one HTML file, no server, no external requests), so it
   attaches to a PR or an artifact store as-is.
 
 ```yaml
@@ -735,7 +735,7 @@ A few things make CI runs pleasanter:
 ## From Python
 
 The CLI is thin wiring over a small public API, so you can run the same pipeline
-yourself — to filter findings, feed them into another tool, or tune a threshold
+yourself: to filter findings, feed them into another tool, or tune a threshold
 the CLI doesn't expose.
 
 <details>
@@ -766,7 +766,7 @@ Findings come back sorted most-severe-first, and every `Issue` carries a `code`,
 in this API prints or exits; that's the CLI's job alone.
 
 To run a subset of the check families rather than all of them, assemble the list
-yourself — `integrity_checks`, `annotation_checks`, `shape_checks`,
+yourself. `integrity_checks`, `annotation_checks`, `shape_checks`,
 `statistics_checks`, `duplicate_checks` and `leakage_checks` each return the
 checks for one family:
 
@@ -781,37 +781,37 @@ engine = AnalysisEngine([*integrity_checks(config), *annotation_checks(config)])
 
 ## Troubleshooting
 
-**`cvflow: command not found`** — use `python -m cvflow` instead.
+**`cvflow: command not found`**: use `python -m cvflow` instead.
 
-**`error: path does not exist`** (exit 3) — check the path; CVFlow doesn't
+**`error: path does not exist`** (exit 3): check the path; CVFlow doesn't
 search for it.
 
-**The format couldn't be detected** (exit 4) — the folder doesn't look like
+**The format couldn't be detected** (exit 4): the folder doesn't look like
 either layout. Pass `-f yolo` or `-f coco` to force one, or move the labels and
 images into the expected structure.
 
-**Every image reports `broken-image-path`** — the labels reference images CVFlow
+**Every image reports `broken-image-path`**: the labels reference images CVFlow
 can't find from the dataset root. Point it at the parent folder that holds both,
 or fix the paths in `data.yaml`.
 
-**"No image files were found next to the annotations"** — an `INFO` finding, not
+**"No image files were found next to the annotations"**: an `INFO` finding, not
 a failure. The structural and annotation checks still ran; only the pixel checks
 were skipped.
 
-**The run seems to hang** — it's hashing images. The stderr note says so before
+**The run seems to hang**: it's hashing images. The stderr note says so before
 it starts; `--no-images` skips that phase.
 
-**The browser didn't open** — the URL is printed either way; open it by hand.
+**The browser didn't open**: the URL is printed either way; open it by hand.
 `--no-browser` makes that the intended behavior.
 
-**"Address already in use"** — you passed `--port` for a port something else
+**"Address already in use"**: you passed `--port` for a port something else
 holds. Drop `--port` to let CVFlow find a free one.
 
-**A teammate can't reach the dashboard** — the default host is loopback. Re-run
+**A teammate can't reach the dashboard**: the default host is loopback. Re-run
 with `--host 0.0.0.0`, and read [the warning](#serving-it) about what that
 exposes.
 
-**Save is greyed out in the editor** — the dataset isn't YOLO detection, or
+**Save is greyed out in the editor**: the dataset isn't YOLO detection, or
 you're looking at an `--html` file. See [What can be edited](#what-can-be-edited).
 
 ## Testing & development
@@ -825,7 +825,7 @@ pip install -e ".[dev]"
 
 ### Run the checks
 
-All four must pass — CI runs exactly these:
+All four must pass; CI runs exactly these:
 
 ```bash
 ruff check .           # lint
@@ -844,7 +844,7 @@ pytest --cov=cvflow --cov-report=term-missing   # with coverage, as CI runs it
 pytest -x -vv                              # stop at the first failure, verbose
 ```
 
-The suite is pure-Python and fast — no fixtures to download and no GPU. Tests
+The suite is pure-Python and fast, with no fixtures to download and no GPU. Tests
 mirror the package structure one file per module, and
 [`tests/conftest.py`](tests/conftest.py) builds minimal-but-valid YOLO and COCO
 datasets in a temp directory, so loader and check tests exercise real file
@@ -855,8 +855,8 @@ CI runs lint and type-checking on Python 3.11, and the test suite on 3.9, 3.10,
 
 ### Try it end to end
 
-Build a tiny broken dataset by hand and watch CVFlow catch it — the fastest way
-to see the whole pipeline work after a change:
+Build a tiny broken dataset by hand and watch CVFlow catch it. This is the fastest
+way to see the whole pipeline work after a change:
 
 ```bash
 mkdir -p demo/images/train demo/labels/train
@@ -895,7 +895,7 @@ INFO         0
 ```
 
 ```bash
-echo $?          # 1  — errors were found
+echo $?          # 1  (errors were found)
 ```
 
 Then check the other two outputs against the same folder:
@@ -906,15 +906,15 @@ cvflow inspect ./demo --html report.html && open report.html   # the static page
 ```
 
 Open a box in the dashboard, drag it back inside the frame, hit **Save labels**,
-and re-run `cvflow inspect ./demo` — the `box-out-of-bounds` error should be
-gone and the exit code back to `0`.
+and re-run `cvflow inspect ./demo`. The `box-out-of-bounds` error should be gone
+and the exit code back to `0`.
 
 ### Conventions
 
-- Keep PRs small and focused — one logical change per PR.
+- Keep PRs small and focused: one logical change per PR.
 - Add or update tests for behavior changes.
 - Prefer language like "potential issue" / "worth reviewing" over declaring
-  something definitively wrong — see [Design philosophy](#design-philosophy).
+  something definitively wrong. See [Design philosophy](#design-philosophy).
 - Add a dependency only when it clearly earns its place.
 
 More detail in [`CONTRIBUTING.md`](CONTRIBUTING.md). For dataset-related bug
@@ -934,7 +934,7 @@ Dataset ─▶ Loaders ─▶ Normalized model ─▶ Analysis engine ─▶ Iss
 ```
 
 Data flows one direction. Each stage depends only on the stage before it through
-a stable interface, never on another stage's internals — so a new format, rule,
+a stable interface, never on another stage's internals, so a new format, rule,
 or output slots in without touching the rest.
 
 ```text
@@ -958,14 +958,14 @@ tests/        pytest suite mirroring the package structure
 The format-agnostic vocabulary everything else speaks in:
 
 - **`Severity`**: `ERROR` / `WARNING` / `INFO`, ordered by seriousness.
-- **`Issue`**: the unit of feedback — `code`, `severity`, `message`, `why`,
-  `location`, `evidence`, `suggestion`.
+- **`Issue`**: the unit of feedback, carrying `code`, `severity`, `message`,
+  `why`, `location`, `evidence` and `suggestion`.
 - **`Location`**: where a finding was detected (path, split, annotation index).
 - **`BoundingBox`**: an annotation in canonical **normalized `xyxy`**
   coordinates, with `from_yolo` / `from_coco` constructors and geometry helpers.
 - **`ImageItem`** / **`Dataset`**: an image (path, split, dims, boxes) and the
   collection of them (format, root, class-name map, split/count helpers).
-- **`DatasetStatistics`** / **`Summary`**: computed descriptive statistics — kept
+- **`DatasetStatistics`** / **`Summary`**: computed descriptive statistics, kept
   in the model so the reporter never has to import `analysis`.
 
 Because the analysis engine only ever sees this model, loaders and checks evolve
@@ -999,7 +999,7 @@ plain detection labels.
   Checks read only the fields they care about.
 - **`default_checks(config)`**: assembles the full check set for `cvflow inspect`.
 
-Each family — integrity, annotations, shapes, statistics, duplicates, leakage —
+Each family (integrity, annotations, shapes, statistics, duplicates, leakage)
 is self-contained and emits `Issue`s, never printing or setting global policy.
 
 ### `cvflow.imaging` and `cvflow.analysis.paths`
@@ -1030,11 +1030,11 @@ a layer above it: both consume `Issue`s and neither knows about the other.
 
 - **`payload.build_payload()`**: the data contract. Turns a `Dataset`, its
   findings, and its statistics into one plain JSON-serializable dict, with every
-  aggregate precomputed in Python — class ranking and cumulative coverage,
+  aggregate precomputed in Python: class ranking and cumulative coverage,
   objects/size/shape histograms, the box-center heatmap, per-code counts, and the
   images carrying the most findings. The page never reasons about the dataset
   itself; adding a chart usually means adding one function here.
-- **`assets/`**: `dashboard.html`, `dashboard.css`, `dashboard.js` — the UI as
+- **`assets/`**: `dashboard.html`, `dashboard.css`, `dashboard.js`, the UI as
   editable design artifacts. No framework, no build step, no external requests.
 - **`assets/vendor/`**: Chart.js and the Geist fonts, inlined into the page at
   render time. Versions and licenses in `assets/vendor/README.md`.
@@ -1045,9 +1045,9 @@ a layer above it: both consume `Issue`s and neither knows about the other.
 - **`dashboard.render_dashboard()`**: inlines the assets and the payload into a
   single self-contained HTML file (`--html`, or served in memory).
 - **`server.serve_dashboard()`**: a loopback `http.server` holding one page in
-  memory. With an `Editor` attached it also answers four endpoints —
+  memory. With an `Editor` attached it also answers four endpoints:
   `GET /api/editor` (is this dataset writable, and which classes?),
-  `GET /api/image`, `GET /api/annotations`, `POST /api/annotations` — and without
+  `GET /api/image`, `GET /api/annotations` and `POST /api/annotations`. Without
   one it serves the page and 404s everything else.
 
 ### `cvflow.sample` and `cvflow.cli`
