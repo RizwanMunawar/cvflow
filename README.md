@@ -55,8 +55,6 @@ https://github.com/user-attachments/assets/8bd483fe-c18a-4cfb-b209-8ba409327506
 &nbsp;·&nbsp; [How it fits together](#how-it-fits-together)
 &nbsp;·&nbsp; [Design philosophy](#design-philosophy)
 
----
-
 ## Quickstart
 
 Three commands. No config, no account, no setup.
