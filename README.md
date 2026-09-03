@@ -684,8 +684,8 @@ from cvflow.analysis import AnalysisEngine, CheckConfig, default_checks
 from cvflow.loaders import load_dataset
 
 config = CheckConfig(
-    tiny_box_side=0.005,             # your objects really are that small
-    near_duplicate_max_hamming=2,    # only flag very close pairs
+    tiny_box_side=0.005,  # your objects really are that small
+    near_duplicate_max_hamming=2,  # only flag very close pairs
     rare_class_fraction=0.02,
 )
 issues = AnalysisEngine(default_checks(config)).run(load_dataset("./dataset"))
@@ -749,7 +749,7 @@ from cvflow.loaders import load_dataset
 from cvflow.model import Severity
 from cvflow.report import render_report
 
-dataset = load_dataset("./dataset")           # fmt="coco" to force a format
+dataset = load_dataset("./dataset")  # fmt="coco" to force a format
 config = CheckConfig(check_images=True, tiny_box_side=0.005)
 issues = AnalysisEngine(default_checks(config)).run(dataset)
 
