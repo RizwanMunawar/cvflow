@@ -41,6 +41,7 @@ class CheckConfig:
         self,
         *,
         check_images: bool = True,
+        image_cache: object | None = None,
         out_of_bounds_eps: float = 1e-3,
         tiny_box_side: float = 0.01,
         huge_box_area: float = 0.9,
@@ -60,6 +61,7 @@ class CheckConfig:
         #: When False, checks that read image bytes (e.g. corrupt-image
         #: detection) are skipped. Useful for a fast, metadata-only pass.
         self.check_images = check_images
+        self.image_cache = image_cache
         #: Tolerance before a normalized coordinate counts as out of bounds.
         self.out_of_bounds_eps = out_of_bounds_eps
         #: A box whose normalized width or height is below this is "tiny".
