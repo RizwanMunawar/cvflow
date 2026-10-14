@@ -45,7 +45,7 @@ class SplitLeakageCheck(Check):
             path = resolved[id(item)]
             if path is None:
                 continue
-            phash = perceptual_hash(path)
+            phash = (cfg.image_cache.result(path, "dhash") if cfg.image_cache is not None else perceptual_hash(path))
             if phash is not None:
                 by_split.setdefault(item.split, []).append((item, phash))
 
