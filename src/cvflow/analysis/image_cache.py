@@ -11,6 +11,7 @@ import json
 import os
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from typing import Literal, overload
 
 from cvflow.imaging import file_hash, is_readable_image, perceptual_hash
 
@@ -68,6 +69,18 @@ class ImageScanCache:
             with ThreadPoolExecutor(max_workers=self.workers) as pool:
                 for key, entry in pool.map(inspect, pending):
                     self._data[key] = entry
+
+    @overload
+    def result(self, path: Path, field: Literal["sha256"]) -> str | None: ...
+
+    @overload
+    def result(self, path: Path, field: Literal["dhash"]) -> int | None: ...
+
+    @overload
+    def result(self, path: Path, field: Literal["readable"]) -> bool | None: ...
+
+    @overload
+    def result(self, path: Path, field: str) -> str | int | bool | None: ...
 
     def result(self, path: Path, field: str) -> str | int | bool | None:
         value = self._data.get(str(path.resolve()), {}).get(field)
