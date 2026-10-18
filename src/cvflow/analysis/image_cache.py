@@ -5,6 +5,7 @@ invalidate a cached entry; use --no-cache to force a complete rescan.
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 from concurrent.futures import ThreadPoolExecutor
@@ -40,7 +41,11 @@ class ImageScanCache:
                 self._data.pop(key, None)
                 continue
             entry = self._data.get(key)
-            if entry is not None and entry.get("size") == stat.st_size and entry.get("mtime_ns") == stat.st_mtime_ns:
+            if (
+                entry is not None
+                and entry.get("size") == stat.st_size
+                and entry.get("mtime_ns") == stat.st_mtime_ns
+            ):
                 continue
             pending.append((key, path, stat.st_size, stat.st_mtime_ns))
 
@@ -71,10 +76,11 @@ class ImageScanCache:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         tmp = self.path.with_name(self.path.name + f".{os.getpid()}.tmp")
         try:
-            tmp.write_text(json.dumps({"version": _VERSION, "entries": self._data}), encoding="utf-8")
+            tmp.write_text(
+                json.dumps({"version": _VERSION, "entries": self._data}),
+                encoding="utf-8",
+            )
             os.replace(tmp, self.path)
         finally:
-            try:
+            with contextlib.suppress(FileNotFoundError):
                 tmp.unlink()
-            except FileNotFoundError:
-                pass
