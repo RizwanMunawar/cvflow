@@ -69,8 +69,9 @@ class ImageScanCache:
                 for key, entry in pool.map(inspect, pending):
                     self._data[key] = entry
 
-    def result(self, path: Path, field: str) -> object | None:
-        return self._data.get(str(path.resolve()), {}).get(field)
+    def result(self, path: Path, field: str) -> str | int | bool | None:
+        value = self._data.get(str(path.resolve()), {}).get(field)
+        return value if isinstance(value, (str, int, bool)) else None
 
     def save(self) -> None:
         if self.path is None:
