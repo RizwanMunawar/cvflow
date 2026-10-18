@@ -38,7 +38,11 @@ class ExactDuplicateCheck(Check):
             path = resolved[id(item)]
             if path is None:
                 continue
-            digest = (self._config.image_cache.result(path, "sha256") if self._config.image_cache is not None else file_hash(path))
+            digest = (
+                self._config.image_cache.result(path, "sha256")
+                if self._config.image_cache is not None
+                else file_hash(path)
+            )
             if digest is None:
                 continue
             by_hash.setdefault(digest, []).append(item)
@@ -80,7 +84,11 @@ class NearDuplicateCheck(Check):
             path = resolved[id(item)]
             if path is None:
                 continue
-            phash = (cfg.image_cache.result(path, "dhash") if cfg.image_cache is not None else perceptual_hash(path))
+            phash = (
+                cfg.image_cache.result(path, "dhash")
+                if cfg.image_cache is not None
+                else perceptual_hash(path)
+            )
             if phash is not None:
                 hashed.append((item, phash))
 
