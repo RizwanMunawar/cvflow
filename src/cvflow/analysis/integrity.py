@@ -227,7 +227,11 @@ class ImageFileCheck(Check):
                 )
                 continue
 
-            if self._config.check_images and not is_readable_image(path):
+            if self._config.image_cache is not None:
+                readable = self._config.image_cache.result(path, "readable")
+            else:
+                readable = is_readable_image(path) if self._config.check_images else True
+            if self._config.check_images and not readable:
                 yield Issue(
                     code="corrupt-image",
                     severity=Severity.ERROR,

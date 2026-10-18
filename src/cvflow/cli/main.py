@@ -18,6 +18,8 @@ from pathlib import Path
 
 from cvflow import __version__
 from cvflow.analysis import AnalysisEngine, CheckConfig, compute_statistics, default_checks
+from cvflow.analysis.image_cache import ImageScanCache
+from cvflow.analysis.paths import resolve_all
 from cvflow.design import DEFAULT_HOST, Editor, render_dashboard, serve_dashboard
 from cvflow.design.payload import TASK_LABELS
 from cvflow.exceptions import DatasetError
@@ -87,6 +89,17 @@ def build_parser() -> argparse.ArgumentParser:
         dest="check_images",
         action="store_false",
         help="Skip checks that read image bytes (faster; skips corrupt-image detection).",
+    )
+    inspect.add_argument(
+        "--workers",
+        type=int,
+        default=4,
+        help="Parallel image inspection workers (default: 4).",
+    )
+    inspect.add_argument(
+        "--no-cache",
+        action="store_true",
+        help="Disable persistent image scan cache.",
     )
     inspect.add_argument(
         "--strict",
@@ -200,10 +213,20 @@ def _cmd_inspect(args: argparse.Namespace) -> int:
         print(f"{_PROG}: error: {exc}", file=sys.stderr)
         return EXIT_LOAD_ERROR
 
-    config = CheckConfig(check_images=args.check_images)
+    if args.workers < 1:
+        print(f"{_PROG}: error: --workers must be >= 1", file=sys.stderr)
+        return EXIT_USAGE
+    cache = None
+    if args.check_images:
+        cache_path = None if args.no_cache else Path(dataset.root) / ".cvflow" / "image-cache.json"
+        cache = ImageScanCache(cache_path, workers=args.workers)
+        cache.scan([p for p in resolve_all(dataset).values() if p is not None])
+    config = CheckConfig(check_images=args.check_images, image_cache=cache)
     engine = AnalysisEngine(default_checks(config))
     print(_working_note(dataset, args.check_images), file=sys.stderr, flush=True)
     issues = engine.run(dataset)
+    if cache is not None:
+        cache.save()
     stats = None if args.no_stats else compute_statistics(dataset)
 
     if args.serve or args.html is not None:
