@@ -90,8 +90,17 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_false",
         help="Skip checks that read image bytes (faster; skips corrupt-image detection).",
     )
-    inspect.add_argument("--workers", type=int, default=4, help="Parallel image inspection workers (default: 4).")
-    inspect.add_argument("--no-cache", action="store_true", help="Disable persistent image scan cache.")
+    inspect.add_argument(
+        "--workers",
+        type=int,
+        default=4,
+        help="Parallel image inspection workers (default: 4).",
+    )
+    inspect.add_argument(
+        "--no-cache",
+        action="store_true",
+        help="Disable persistent image scan cache.",
+    )
     inspect.add_argument(
         "--strict",
         action="store_true",
