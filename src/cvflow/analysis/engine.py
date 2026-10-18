@@ -15,6 +15,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 
+from cvflow.analysis.image_cache import ImageScanCache
 from cvflow.model import Dataset, Issue
 
 
@@ -41,7 +42,7 @@ class CheckConfig:
         self,
         *,
         check_images: bool = True,
-        image_cache: object | None = None,
+        image_cache: ImageScanCache | None = None,
         out_of_bounds_eps: float = 1e-3,
         tiny_box_side: float = 0.01,
         huge_box_area: float = 0.9,
