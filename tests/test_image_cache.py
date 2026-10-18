@@ -5,7 +5,9 @@ from PIL import Image
 from cvflow.analysis.image_cache import ImageScanCache
 
 
-def test_reuses_unchanged_images_and_invalidates_modified_files(tmp_path: Path, monkeypatch) -> None:
+def test_reuses_unchanged_images_and_invalidates_modified_files(
+    tmp_path: Path, monkeypatch
+) -> None:
     image = tmp_path / "a.png"
     Image.new("RGB", (8, 8), "red").save(image)
     path = tmp_path / "cache.json"
