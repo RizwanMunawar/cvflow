@@ -3,6 +3,7 @@
 Persist only derived facts, never pixels. Changes to size or modification time
 invalidate a cached entry; use --no-cache to force a complete rescan.
 """
+
 from __future__ import annotations
 
 import contextlib
@@ -52,7 +53,8 @@ class ImageScanCache:
         def inspect(task: tuple[str, Path, int, int]) -> tuple[str, dict[str, object]]:
             key, path, size, mtime_ns = task
             return key, {
-                "size": size, "mtime_ns": mtime_ns,
+                "size": size,
+                "mtime_ns": mtime_ns,
                 "readable": is_readable_image(path),
                 "sha256": file_hash(path),
                 "dhash": perceptual_hash(path),
